@@ -24,6 +24,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { overflow-x: clip; }
 html { -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+section[id] { scroll-margin-top: calc(var(--hdr) + 8px); }
 body {
   margin: 0;
   background: var(--cream);
@@ -421,14 +423,18 @@ h2 em, blockquote em { color: var(--violet); }
 @media (max-width: 860px) {
   :root { --hdr: 64px; }
   .burger { display: block; }
+  /* The header is transformed (hide-on-scroll), which would trap a position:fixed
+     overlay inside it — so the menu hangs below the header with absolute positioning. */
   .nav {
-    position: fixed; inset: 0; z-index: 1;
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 1;
+    height: calc(100vh - var(--hdr)); height: calc(100dvh - var(--hdr));
     flex-direction: column; justify-content: center; gap: 22px;
     background: var(--cream); font: 400 2.2rem/1 var(--serif);
     opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
   }
   .nav.open { opacity: 1; visibility: visible; }
   .nav-cta { font: 600 15px/1 var(--sans); padding: 16px 28px; margin-top: 10px; }
+  body.menu-open .hdr { background: var(--cream); box-shadow: none; transform: none !important; }
 
   .stack-card { grid-template-columns: 1fr; min-height: 0; gap: 22px; top: calc(var(--hdr) + 10px + var(--i) * 12px); }
   .sc-media { order: -1; min-height: 0; aspect-ratio: 16 / 10; }
