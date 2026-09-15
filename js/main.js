@@ -79,6 +79,7 @@
     }
     Object.assign(M, { aw: w, ah: h, ax: x, ay: y });
     hero.style.setProperty('--aw', w + 'px');
+    if (RM) hero.style.height = M.pinH + 'px';   // no pinned runway without motion
     M.heroTop = hero.offsetTop;
     M.heroLen = Math.max(1, hero.offsetHeight - M.pinH);
 
@@ -366,7 +367,15 @@
     requestAnimationFrame(loop);
   }
 
-  addEventListener('resize', () => { measure(); update(scrollY, 0); }, { passive: true });
+  let lastW = innerWidth, lastH = innerHeight;
+  addEventListener('resize', () => {
+    // On phones the address bar showing/hiding fires resize mid-scroll; only
+    // re-measure for real changes (rotation, keyboard, window resize).
+    const dw = innerWidth !== lastW, dh = Math.abs(innerHeight - lastH) > 160;
+    if (M.mobile && !dw && !dh) return;
+    lastW = innerWidth; lastH = innerHeight;
+    measure(); update(scrollY, 0);
+  }, { passive: true });
   addEventListener('load', measure);
   measure();
   update(scrollY, 0);
@@ -398,6 +407,7 @@
   const burger = $('#burger');
   const nav = $('#nav');
   const setMenu = open => {
+    if (open) { hdr.classList.remove('hide'); hdrHidden = false; }
     nav.classList.toggle('open', open);
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
@@ -407,6 +417,8 @@
   burger.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
   nav.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
   addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+  $('#year').textContent = new Date().getFullYear();
 
   /* =========================================================
      Enquiry links pre-fill the form
