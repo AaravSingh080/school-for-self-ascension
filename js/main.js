@@ -33,6 +33,15 @@
   const rail = $('#rail');
   const railFill = $('#railFill');
   const railItems = $$('.rail-item');
+  const trainings = $('#trainings');
+  const trPinEl = $('.tr-pin');
+  const trTrack = $('#trTrack');
+  const trCards = $$('.tr-card');
+  const trImgs = trCards.map(c => $('.tr-media img', c));
+  const trBar = $('#trBar');
+  const trCount = $('#trCount');
+  const trHint = $('.tr-hint');
+  const jrs = $$('.jr').map(el => ({ el, portal: $('.jr-portal', el), img: $('.jr-portal img', el), word: $('.jr-word', el) }));
   const wipe = $('#wipe');
   const wipeImg = $('#wipe img');
   const apo = $('#apo');
@@ -59,7 +68,6 @@
     M.small = M.vw < 900;
     M.mobile = M.vw < 860;
     M.hdr = M.mobile ? 64 : 76;
-    M.docLen = Math.max(1, document.documentElement.scrollHeight - M.vh);
 
     // Hero arch geometry (in pin-stage pixels)
     hero.classList.toggle('is-small', M.small);
@@ -86,7 +94,24 @@
     // Marquee loop width (content repeated 3×)
     M.mqThird = marquee.scrollWidth / 3;
 
+    // Teacher trainings: pinned horizontal pan on desktop, native swipe on phones / reduced motion
+    M.trPin = !!trainings && !M.mobile && !RM;
+    if (trainings) {
+      trainings.classList.toggle('is-pinned', M.trPin);
+      trainings.style.height = '';
+      if (M.trPin) {
+        M.trOver = Math.max(0, trTrack.scrollWidth - M.vw);
+        trainings.style.height = (trPinEl.offsetHeight + M.trOver) + 'px';
+      } else {
+        M.trOver = 0;
+        trTrack.style.transform = '';
+        trCards.forEach(c => { c.style.transform = ''; });
+      }
+      trHint.innerHTML = (M.trPin ? 'Scroll' : 'Swipe') + ' to explore <b>→</b>';
+    }
+
     spySections.forEach((s, i) => { M['spy' + i] = s ? s.offsetTop : 0; });
+    M.docLen = Math.max(1, document.documentElement.scrollHeight - M.vh);
   }
 
   /* ---------- split text: word fill ---------- */
@@ -276,7 +301,31 @@
       }
     }
 
-    /* ---- workshop image wipe ---- */
+    /* ---- teacher trainings: vertical scroll pans the row ---- */
+    if (trainings) {
+      const r = trainings.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) {
+        let p;
+        if (M.trPin) {
+          p = clamp01(-r.top / (M.trOver || 1));
+          trTrack.style.transform = `translate3d(${(-p * M.trOver).toFixed(1)}px,0,0)`;
+        } else {
+          const max = trTrack.scrollWidth - trTrack.clientWidth;
+          p = max > 0 ? clamp01(trTrack.scrollLeft / max) : 0;
+        }
+        const half = M.vw / 2;
+        trCards.forEach((card, i) => {
+          const cr = card.getBoundingClientRect();
+          const c = Math.max(-1.2, Math.min(1.2, (cr.left + cr.width / 2 - half) / half));
+          if (!RM) trImgs[i].style.transform = `translate3d(${(c * -7).toFixed(2)}%,0,0) scale(1.18)`;
+          if (M.trPin) card.style.transform = `translateY(${(Math.abs(c) * 16).toFixed(1)}px) scale(${(1 - Math.abs(c) * 0.03).toFixed(4)})`;
+        });
+        trBar.style.transform = `scaleX(${p})`;
+        trCount.textContent = String(1 + Math.round(p * (trCards.length - 1))).padStart(2, '0');
+      }
+    }
+
+    /* ---- sound course image wipe ---- */
     {
       const r = wipe.getBoundingClientRect();
       if (r.top < vh && r.bottom > 0) {
@@ -285,6 +334,20 @@
         wipeImg.style.transform = `scale(${lerp(1.25, 1, e)})`;
       }
     }
+
+    /* ---- sacred journeys: portal opens, image drifts ---- */
+    jrs.forEach(j => {
+      const r = j.el.getBoundingClientRect();
+      if (r.top > vh || r.bottom < 0) return;
+      const pr = j.portal.getBoundingClientRect();
+      const e = RM ? 1 : easeOut(clamp01((vh * 0.95 - pr.top) / (vh * 0.75)));
+      const rad = lerp(pr.height * 0.4, 24, e);
+      j.portal.style.clipPath = `inset(${lerp(10, 0, e).toFixed(2)}% ${lerp(18, 0, e).toFixed(2)}% round ${rad.toFixed(1)}px)`;
+      if (RM) return;
+      const p = clamp01((vh - r.top) / (vh + r.height));
+      j.img.style.transform = `translate3d(0, ${lerp(-5, 5, p).toFixed(2)}%, 0) scale(${lerp(1.3, 1.06, e).toFixed(4)})`;
+      j.word.style.transform = `translate3d(${lerp(14, -14, p).toFixed(2)}%, 0, 0)`;
+    });
 
     /* ---- apothecary: images change with scroll ---- */
     {
@@ -407,12 +470,13 @@
   const burger = $('#burger');
   const nav = $('#nav');
   const setMenu = open => {
+    if (nav.classList.contains('open') === open) return;   // no-op (e.g. Esc while a dialog is open)
     if (open) { hdr.classList.remove('hide'); hdrHidden = false; }
     nav.classList.toggle('open', open);
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     document.body.classList.toggle('menu-open', open);
-    document.body.classList.toggle('locked', open);
+    document.documentElement.classList.toggle('locked', open);
   };
   burger.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
   nav.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
@@ -421,17 +485,30 @@
   $('#year').textContent = new Date().getFullYear();
 
   /* =========================================================
-     Enquiry links pre-fill the form
+     Contact: WhatsApp / email hand-off
      ========================================================= */
+  const WA_NUMBER = '919962036811';
+  const EMAIL = 'archangelg9@gmail.com';
+  const waLink = msg => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+  $$('.wa-link[data-wa]').forEach(a => { a.href = waLink(a.dataset.wa); });
+
   const interest = $('#interest');
-  $$('[data-interest]').forEach(a => a.addEventListener('click', () => {
-    const v = a.dataset.interest;
+  const setInterest = v => {
     const opt = [...interest.options].find(o => o.text === v);
     if (opt) interest.value = opt.value;
-  }));
+  };
+  $$('[data-interest]').forEach(a => a.addEventListener('click', () => setInterest(a.dataset.interest)));
 
   const form = $('#form');
   const note = $('#formNote');
+  const setNote = (before, linkText, href) => {
+    note.textContent = before;
+    const a = document.createElement('a');
+    a.href = href;
+    a.textContent = linkText;
+    if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener'; }
+    note.append(a, '.');
+  };
   form.addEventListener('submit', e => {
     e.preventDefault();
     let ok = true;
@@ -442,11 +519,62 @@
       if (bad) ok = false;
     });
     if (!ok) { note.textContent = 'Please add your name and a way to reach you.'; return; }
-    // TODO: connect to the client's email / WhatsApp / form service
-    const name = form.elements.name.value.trim().split(' ')[0];
-    note.textContent = `Thank you, ${name} — Manjula will be in touch soon.`;
-    form.reset();
+
+    const f = form.elements;
+    const topic = f.interest.value;
+    const msg = f.message.value.trim();
+    const text = `Hello Manjula, my name is ${f.name.value.trim()}.\nI'm interested in: ${topic}.` +
+      (msg ? `\n\n${msg}` : '') + `\n\nYou can reach me at: ${f.contact.value.trim()}`;
+
+    if (e.submitter && e.submitter.value === 'email') {
+      location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Enquiry: ' + topic)}&body=${encodeURIComponent(text)}`;
+      setNote('Your email app should open with the message ready. If it doesn\'t, write to ', EMAIL, `mailto:${EMAIL}`);
+    } else {
+      window.open(waLink(text), '_blank', 'noopener');
+      setNote('WhatsApp should open with your message ready to send. If it doesn\'t, message ', '+91 99620 36811', waLink(text));
+    }
   });
+
+  /* =========================================================
+     Teacher training details dialog
+     ========================================================= */
+  const dlg = $('#dlg');
+  if (dlg) {
+    const dlgBody = $('#dlgBody');
+    const dlgImg = $('#dlgImg');
+    const dlgWa = $('#dlgWa');
+    let dlgTitle = '', lastFocus = null;
+    const openProgramme = card => {
+      if (typeof dlg.showModal !== 'function') { setInterest(card.dataset.title); location.hash = '#contact'; return; }
+      lastFocus = document.activeElement;
+      dlgTitle = card.dataset.title;
+      dlgBody.innerHTML = $('.tr-detail', card).innerHTML;
+      const h = $('h3', dlgBody);
+      if (h) h.id = 'dlgTitle';
+      const img = $('img', card);
+      dlgImg.src = img.currentSrc || img.src;
+      dlgWa.href = waLink(`Hello Manjula, I'd like to know more about the ${dlgTitle}.`);
+      $('.dlg-inner', dlg).scrollTop = 0;
+      dlg.showModal();
+      document.documentElement.classList.add('locked');
+    };
+    dlg.addEventListener('close', () => {
+      document.documentElement.classList.remove('locked');
+      if (lastFocus) lastFocus.focus({ preventScroll: true });
+    });
+    $('#dlgClose').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dlg.close(); } });
+    $('#dlgForm').addEventListener('click', e => {
+      e.preventDefault();
+      setInterest(dlgTitle);
+      lastFocus = null;
+      dlg.close();
+      $('#contact').scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
+      form.elements.name.focus({ preventScroll: true });
+    });
+    trCards.forEach(card => card.addEventListener('click', () => openProgramme(card)));
+  }
 
   /* =========================================================
      Film
