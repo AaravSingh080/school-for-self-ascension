@@ -1,0 +1,151 @@
+rules_version = '2';
+
+/* =========================================================
+   School for Self Ascension — Firestore security rules
+   ---------------------------------------------------------
+   PASTE THIS INTO: Firebase console → Firestore Database → Rules → Publish.
+
+   This file is the ONLY thing that actually protects the data. Every line of
+   JavaScript on the website is public and can be edited by any visitor in
+   their own browser, so nothing in js/ can be trusted to enforce anything.
+   These rules run on Google's servers, where a visitor cannot reach them.
+
+   BEFORE YOU PUBLISH: replace the UID on the ADMIN_UID line below.
+   Find it in Firebase console → Authentication → Users → the "User UID" column
+   for Manjula's account. It looks like: K2mWq9xYzAbCdEfGhIjKlMnOpQr1
+
+   Why a UID and not the email: an email can be changed by the account holder
+   in some flows, and `admins` in js/config.js only decides what the screen
+   shows. The UID here is the real lock.
+   ========================================================= */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ----- who is who ----- */
+    function adminUid() {
+      return 'REPLACE_WITH_MANJULA_UID';
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn() && request.auth.uid == adminUid();
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    /* ----- helpers ----- */
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    /* The price a visitor must pay is read from the activity document on the
+       server, never taken from whatever the browser submitted. Without this a
+       visitor could register for a ₹25,000 journey and write amountExpected: 1. */
+    function activityPrice(activityId) {
+      return get(/databases/$(database)/documents/activities/$(activityId)).data.price;
+    }
+    function activityIsOpen(activityId) {
+      return get(/databases/$(database)/documents/activities/$(activityId)).data.registrationOpen == true;
+    }
+
+    /* Only these payment states may ever be written by a visitor.
+       'paid', 'refunded' and 'waived' are claims about money arriving, and the
+       only honest source for those is Manjula checking her own bank. */
+    function visitorPayState(s) {
+      return s in ['unpaid', 'initiated', 'claimed'];
+    }
+
+    /* =====================================================
+       activities — the workshops shown on the website
+       Anyone may read (the public site lists them).
+       Only Manjula may create, change or delete one.
+       ===================================================== */
+    match /activities/{activityId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /* =====================================================
+       users — one small profile document per account
+       Readable and writable only by that person.
+       ===================================================== */
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid)
+        && incoming().keys().hasOnly(['name', 'email', 'phone', 'createdAt']);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    /* =====================================================
+       registrations — the personal data that matters most
+       ===================================================== */
+    match /registrations/{regId} {
+
+      /* READ: you see your own. Manjula sees everyone's.
+         Without the second clause nobody could run the school; without the
+         first, anyone signed in could read every registrant's phone number
+         and home address, which is the worst outcome this system can have. */
+      allow read: if isAdmin() || isOwner(existing().userId);
+
+      /* CREATE: a signed-in person registering themselves. */
+      allow create: if isSignedIn()
+        /* you may only create a registration that belongs to you */
+        && incoming().userId == request.auth.uid
+        /* the activity must exist and be open */
+        && activityIsOpen(incoming().activityId)
+        /* a new registration always starts unpaid and pending — you cannot
+           create one that is already marked paid */
+        && incoming().payment.state == 'unpaid'
+        && incoming().status == 'pending'
+        && incoming().payment.amountReceived == null
+        && incoming().payment.verifiedBy == ''
+        /* the amount owed must match the real price of the activity */
+        && incoming().payment.amountExpected == activityPrice(incoming().activityId)
+        /* consent has to actually be recorded */
+        && incoming().termsAccepted == true
+        && incoming().termsVersion is string
+        && incoming().confirmedAdult == true
+        /* keep the fields sane */
+        && incoming().name is string && incoming().name.size() > 0 && incoming().name.size() < 120
+        && incoming().email is string && incoming().email.size() < 200
+        && incoming().phone is string && incoming().phone.size() < 30
+        && incoming().notes.size() < 2000;
+
+      /* UPDATE by the person who registered.
+         They may do exactly two things: say they have started paying, say they
+         have paid and give a reference, or cancel. They may never change the
+         amount, the activity, their own verified status, or anyone's name. */
+      allow update: if isOwner(existing().userId)
+        && incoming().userId == existing().userId
+        && incoming().activityId == existing().activityId
+        && incoming().ref == existing().ref
+        && incoming().payment.amountExpected == existing().payment.amountExpected
+        /* the money facts stay exactly as they were */
+        && incoming().payment.amountReceived == existing().payment.amountReceived
+        && incoming().payment.verifiedBy == existing().payment.verifiedBy
+        && incoming().payment.verifiedAt == existing().payment.verifiedAt
+        /* and they can only move it to a state a visitor is allowed to set */
+        && visitorPayState(incoming().payment.state)
+        && incoming().status in ['pending', 'cancelled']
+        /* a confirmed registration can't be quietly rewritten */
+        && existing().payment.state != 'paid'
+        && incoming().payment.utr.size() < 60;
+
+      /* UPDATE by Manjula — she is the one who reconciles money, so she may
+         write the states nobody else can. */
+      allow update: if isAdmin();
+
+      /* Nobody deletes a registration, not even Manjula: a deleted record is a
+         person who paid and has no proof. Cancel it instead — that keeps the
+         history. Remove this line only if you really mean it. */
+      allow delete: if false;
+    }
+
+    /* Anything not named above is closed. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

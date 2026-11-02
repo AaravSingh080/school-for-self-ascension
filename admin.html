@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — School for Self Ascension</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#4B2459">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1.5 36 10.75v18.5L20 38.5 4 29.25v-18.5Z' fill='%234B2459'/%3E%3Cpath d='M20 11c2.4 3.3 3.6 6.3 3.6 9.1S22.4 25.5 20 28c-2.4-2.5-3.6-5.1-3.6-7.9S17.6 14.3 20 11Z' fill='%23E9D3AE'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/app.css?v=4">
+</head>
+<body class="app">
+
+  <header class="app-hdr">
+    <a class="brand" href="index.html" aria-label="School for Self Ascension home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z"/>
+        <path d="M20 11.5c2.3 3.2 3.4 6.1 3.4 8.8S22.3 25.5 20 28c-2.3-2.5-3.4-5-3.4-7.7S17.7 14.7 20 11.5Z"/>
+        <path d="M20 28c-4.3-.4-7.3-2.4-8.6-6.3 2.9-.4 5.4.3 7.6 2M20 28c4.3-.4 7.3-2.4 8.6-6.3-2.9-.4-5.4.3-7.6 2"/>
+      </svg>
+      <span class="brand-text"><small>School for</small>Self Ascension</span>
+    </a>
+    <div class="app-hdr-right">
+      <a class="app-back" href="index.html">← Back to the website</a>
+      <div id="acctHost"></div>
+    </div>
+  </header>
+
+  <div id="demoBar"></div>
+
+  <main class="app-main">
+
+    <!-- Loading -->
+    <div class="state" id="booting">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Opening the admin panel…</p>
+    </div>
+
+    <!-- Not signed in -->
+    <div class="panel state" id="gateSignIn" hidden>
+      <h3>Please sign in</h3>
+      <p>The admin panel is for Manjula. Sign in with the school's account to add workshops and see who has registered.</p>
+      <button class="btn btn-gold" type="button" id="gateSignInBtn"><span class="roll"><span>Sign in</span><span>Sign in</span></span></button>
+    </div>
+
+    <!-- Signed in, but not an admin -->
+    <div class="panel state" id="gateDenied" hidden>
+      <h3>This page isn't for your account</h3>
+      <p id="gateDeniedWho">You're signed in, but this account doesn't have admin access.</p>
+      <a class="btn btn-ghost" href="index.html">Back to the website</a>
+    </div>
+
+    <!-- The panel -->
+    <div id="adminApp" hidden>
+      <div class="app-head">
+        <h1>Admin <em>panel</em></h1>
+        <p>Add and edit what appears on the website, and see everyone who has registered.</p>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tabActivities" aria-selected="true" aria-controls="paneActivities">Activities</button>
+        <button class="tab" role="tab" id="tabRegs" aria-selected="false" aria-controls="paneRegs">Registrations <span id="regCount"></span></button>
+      </div>
+
+      <!-- ============ Activities ============ -->
+      <section id="paneActivities" role="tabpanel" aria-labelledby="tabActivities">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>What's on the website</h2>
+            <button class="btn btn-gold" type="button" id="addBtn"><span class="roll"><span>+ Add an activity</span><span>+ Add an activity</span></span></button>
+          </div>
+          <p class="panel-note" id="actNote">These appear on the homepage in their section. Hiding one removes it from the website but keeps every registration.</p>
+          <div class="adm-list" id="actList"></div>
+        </div>
+      </section>
+
+      <!-- ============ Registrations ============ -->
+      <section id="paneRegs" role="tabpanel" aria-labelledby="tabRegs" hidden>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Registrations</h2>
+            <div class="adm-acts">
+              <button class="btn btn-ghost" type="button" id="addRegBtn">+ Add by hand</button>
+              <button class="btn btn-ghost" type="button" id="csvBtn">Download as spreadsheet</button>
+            </div>
+          </div>
+          <div class="adm-tools">
+            <input class="adm-search" type="search" id="regSearch" placeholder="Search a name, email, phone or workshop…" aria-label="Search registrations">
+            <select class="adm-search" id="regFilter" style="flex:0 0 auto;min-width:190px" aria-label="Filter registrations">
+              <option value="">Everyone</option>
+              <option value="pending">Awaiting confirmation</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="claimed">Says they've paid</option>
+              <option value="unpaid">Not paid yet</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="adm-table-wrap">
+            <table class="adm" id="regTable">
+              <thead>
+                <tr>
+                  <th>Who</th><th>Activity</th><th>Date</th><th>Payment</th><th>Status</th><th>Registered</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="regBody"></tbody>
+            </table>
+          </div>
+          <div class="state" id="regEmpty" hidden>
+            <h3>No registrations yet</h3>
+            <p>When somebody registers for a workshop they'll appear here, with their contact details and whether they've paid.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============ Activity editor ============ -->
+  <dialog class="dlg" id="editDlg" aria-labelledby="editTitle">
+    <form class="auth-form" id="editForm" novalidate style="max-width:none">
+      <button class="dlg-close" id="editClose" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <p class="dlg-kicker" id="editKicker">Activity</p>
+      <h3 id="editTitle">Add an activity</h3>
+
+      <fieldset>
+        <legend>The basics</legend>
+        <div class="f-grid two">
+          <div class="f-row">
+            <label for="eTitle">Name <small>(on the card)</small></label>
+            <input id="eTitle" name="title" type="text" required placeholder="Angels">
+          </div>
+          <div class="f-row">
+            <label for="eSection">Section of the website</label>
+            <select id="eSection" name="section">
+              <option value="trainings">Teacher trainings</option>
+              <option value="courses">Courses</option>
+              <option value="journeys">Sacred journeys</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eFullTitle">Full title <small>(on the details page)</small></label>
+          <input id="eFullTitle" name="fullTitle" type="text" placeholder="Angel Teacher Training">
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eCardText">Short line on the card</label>
+          <input id="eCardText" name="cardText" type="text" maxlength="160" placeholder="Be the angelic light that spreads around and into the world.">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>The details</legend>
+        <div class="f-row">
+          <label for="eLead">Opening sentence</label>
+          <textarea id="eLead" name="lead" rows="2" placeholder="Do you want to teach about Angels?"></textarea>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eBody">Description <small>(one paragraph per line)</small></label>
+          <textarea id="eBody" name="body" rows="4"></textarea>
+        </div>
+        <div class="f-grid two" style="margin-top:15px">
+          <div class="f-row">
+            <label for="eListTitle">Bullet list heading</label>
+            <input id="eListTitle" name="listTitle" type="text" placeholder="What you'll learn">
+          </div>
+          <div class="f-row">
+            <label for="eAccred">Accreditation</label>
+            <input id="eAccred" name="accreditation" type="text" placeholder="Diana Cooper School of White Light, UK">
+          </div>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eList">Bullet points <small>(one per line)</small></label>
+          <textarea id="eList" name="list" rows="5"></textarea>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eNote">Highlighted note <small>(optional)</small></label>
+          <input id="eNote" name="note" type="text">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Picture</legend>
+        <div class="f-row">
+          <label for="eImage">Image file</label>
+          <select id="eImage" name="image"></select>
+          <p class="f-hint">To use a new picture, upload it to <code>assets/img/</code> in the website files first.</p>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="eImageAlt">Describe the picture <small>(for screen readers)</small></label>
+          <input id="eImageAlt" name="imageAlt" type="text">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dates on offer</legend>
+        <p class="fset-note">Add a row for each date people can choose. Leave empty if there's no date yet — people can still register their interest.</p>
+        <div class="date-rows" id="dateRows"></div>
+        <button class="mini" type="button" id="addDate" style="margin-top:12px">+ Add a date</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Price &amp; places</legend>
+        <div class="f-grid three">
+          <div class="f-row">
+            <label for="ePrice">Price in ₹ <small>(blank = free / on request)</small></label>
+            <input id="ePrice" name="price" type="number" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="f-row">
+            <label for="eSeats">Places <small>(blank = no limit)</small></label>
+            <input id="eSeats" name="seats" type="number" min="1" step="1" inputmode="numeric">
+          </div>
+          <div class="f-row">
+            <label for="eOrder">Order on the page</label>
+            <input id="eOrder" name="order" type="number" step="10" inputmode="numeric">
+          </div>
+        </div>
+        <div style="display:grid;gap:10px;margin-top:16px">
+          <label class="terms" style="background:#fff">
+            <input type="checkbox" id="ePublished" name="published" checked>
+            <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+            <span class="terms-text"><strong>Show on the website.</strong> Untick to take it down without losing anything.</span>
+          </label>
+          <label class="terms" style="background:#fff">
+            <input type="checkbox" id="eRegOpen" name="registrationOpen" checked>
+            <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+            <span class="terms-text"><strong>Accepting registrations.</strong> Untick when it's full or finished.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <p class="auth-error" id="editError" role="alert" hidden></p>
+
+      <div class="dlg-actions" style="margin-top:4px">
+        <button class="btn btn-gold" type="submit"><span class="roll"><span>Save</span><span>Save</span></span></button>
+        <button class="btn btn-ghost" type="button" id="editCancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ============ Registration detail ============ -->
+  <dialog class="dlg auth-dlg" id="detailDlg" aria-labelledby="detailTitle">
+    <div class="auth-form" style="display:block">
+      <button class="dlg-close" id="detailClose" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div id="detailBody"></div>
+    </div>
+  </dialog>
+
+  <!-- ============ Add a registration by hand ============ -->
+  <dialog class="dlg auth-dlg" id="manualDlg" aria-labelledby="manualTitle">
+    <form class="auth-form" id="manualForm" novalidate>
+      <button class="dlg-close" id="manualClose" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <p class="dlg-kicker">Booked off the website</p>
+      <h3 id="manualTitle">Add a registration by hand</h3>
+      <p class="auth-lead">For someone who booked on WhatsApp, by phone or in person.</p>
+
+      <div class="f-row">
+        <label for="mrActivity">Which activity</label>
+        <select id="mrActivity" name="activityId"></select>
+        <p class="f-hint">Fee: <span id="mrFee">—</span></p>
+      </div>
+      <div class="f-row" id="mrDateRow" style="margin-top:15px">
+        <label for="mrDate">Date</label>
+        <select id="mrDate" name="dateId"></select>
+      </div>
+      <div class="f-row" style="margin-top:15px">
+        <label for="mrName">Their name</label>
+        <input id="mrName" name="name" type="text" required autocapitalize="words">
+      </div>
+      <div class="f-grid two" style="margin-top:15px">
+        <div class="f-row">
+          <label for="mrPhone">Phone</label>
+          <input id="mrPhone" name="phone" type="tel" inputmode="tel">
+        </div>
+        <div class="f-row">
+          <label for="mrEmail">Email</label>
+          <input id="mrEmail" name="email" type="email" inputmode="email">
+        </div>
+      </div>
+      <div class="f-grid two" style="margin-top:15px">
+        <div class="f-row">
+          <label for="mrLine1">Address <small>(optional)</small></label>
+          <input id="mrLine1" name="line1" type="text">
+        </div>
+        <div class="f-row">
+          <label for="mrCity">City <small>(optional)</small></label>
+          <input id="mrCity" name="city" type="text">
+        </div>
+      </div>
+      <div class="f-row" style="margin-top:15px">
+        <label for="mrNotes">Notes <small>(optional)</small></label>
+        <textarea id="mrNotes" name="notes" rows="2"></textarea>
+      </div>
+
+      <label class="terms" style="margin-top:16px;background:#fff">
+        <input type="checkbox" id="mrConsent" name="consent">
+        <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+        <span class="terms-text">I confirm this person agreed to the terms and is happy to be contacted.
+        This is recorded as consent given verbally.</span>
+      </label>
+
+      <p class="auth-error" id="manualError" role="alert" hidden></p>
+      <div class="dlg-actions">
+        <button class="btn btn-gold" type="submit"><span class="roll"><span>Add registration</span><span>Add registration</span></span></button>
+        <button class="btn btn-ghost" type="button" id="manualCancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js?v=4"></script>
+  <script src="js/seed-content.js?v=4"></script>
+  <script src="js/store.js?v=4"></script>
+  <script src="js/auth-ui.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
+</body>
+</html>

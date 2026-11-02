@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My registrations — School for Self Ascension</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#4B2459">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1.5 36 10.75v18.5L20 38.5 4 29.25v-18.5Z' fill='%234B2459'/%3E%3Cpath d='M20 11c2.4 3.3 3.6 6.3 3.6 9.1S22.4 25.5 20 28c-2.4-2.5-3.6-5.1-3.6-7.9S17.6 14.3 20 11Z' fill='%23E9D3AE'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/app.css?v=4">
+</head>
+<body class="app">
+
+  <header class="app-hdr">
+    <a class="brand" href="index.html" aria-label="School for Self Ascension home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z"/>
+        <path d="M20 11.5c2.3 3.2 3.4 6.1 3.4 8.8S22.3 25.5 20 28c-2.3-2.5-3.4-5-3.4-7.7S17.7 14.7 20 11.5Z"/>
+        <path d="M20 28c-4.3-.4-7.3-2.4-8.6-6.3 2.9-.4 5.4.3 7.6 2M20 28c4.3-.4 7.3-2.4 8.6-6.3-2.9-.4-5.4.3-7.6 2"/>
+      </svg>
+      <span class="brand-text"><small>School for</small>Self Ascension</span>
+    </a>
+    <div class="app-hdr-right">
+      <a class="app-back" href="index.html">← The website</a>
+      <div id="acctHost"></div>
+    </div>
+  </header>
+
+  <div id="demoBar"></div>
+
+  <main class="app-main narrow">
+    <div class="state" id="booting">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>One moment…</p>
+    </div>
+
+    <div class="panel state" id="gateSignIn" hidden>
+      <h3>Please sign in</h3>
+      <p>Sign in to see the workshops you've registered for.</p>
+      <button class="btn btn-gold" type="button" id="gateSignInBtn"><span class="roll"><span>Sign in</span><span>Sign in</span></span></button>
+    </div>
+
+    <div id="listWrap" hidden>
+      <div class="app-head">
+        <h1>My <em>registrations</em></h1>
+        <p id="listSub"></p>
+      </div>
+      <div id="list"></div>
+
+      <div class="state" id="empty" hidden>
+        <h3>Nothing here yet</h3>
+        <p>When you register for a workshop it will appear here, along with what you've paid and what's still to do.</p>
+        <a class="btn btn-gold" href="register.html"><span class="roll"><span>See what's on</span><span>See what's on</span></span></a>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js?v=4"></script>
+  <script src="js/seed-content.js?v=4"></script>
+  <script src="js/store.js?v=4"></script>
+  <script src="js/auth-ui.js?v=4"></script>
+  <script src="js/my-registrations.js?v=4"></script>
+</body>
+</html>
