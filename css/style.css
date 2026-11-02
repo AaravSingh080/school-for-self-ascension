@@ -85,7 +85,9 @@ h2 em, blockquote em { color: var(--violet); }
 .roll > span { display: block; transition: transform .5s var(--ease); }
 .btn:hover .roll > span { transform: translateY(-100%); }
 
-.link-arrow { display: inline-flex; gap: 10px; font-weight: 600; font-size: 14px; letter-spacing: .03em; border-bottom: 1px solid currentColor; padding-bottom: 4px; }
+.link-arrow { position: relative; display: inline-flex; gap: 10px; font-weight: 600; font-size: 14px; letter-spacing: .03em; border-bottom: 1px solid currentColor; padding-bottom: 4px; }
+/* invisible hit areas: comfortable tap targets without changing the look */
+.link-arrow::before, .contact-meta a::before, .foot-top a::before { content: ""; position: absolute; inset: -12px -6px; }
 .link-arrow span { transition: transform .4s var(--ease); }
 .link-arrow:hover span { transform: translateX(6px); }
 
@@ -125,7 +127,7 @@ h2 em, blockquote em { color: var(--violet); }
 .hdr.hide { transform: translateY(-100%); }
 .brand { display: flex; align-items: center; gap: 10px; font: italic 500 1.6rem/1 var(--serif); color: var(--plum); }
 .brand-text { display: flex; flex-direction: column; gap: 3px; white-space: nowrap; }
-.brand-text small { font: 600 9px/1 var(--sans); font-style: normal; letter-spacing: .28em; text-transform: uppercase; color: var(--violet); }
+.brand-text small { font: 600 10px/1 var(--sans); font-style: normal; letter-spacing: .28em; text-transform: uppercase; color: var(--violet); }
 .brand-mark { width: 30px; height: 30px; fill: none; stroke: var(--violet); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .nav { display: flex; align-items: center; gap: clamp(18px, 2.4vw, 36px); font-size: 14px; font-weight: 500; }
 .nav a:not(.nav-cta) { position: relative; padding: 6px 0; }
@@ -484,7 +486,7 @@ html.locked { overflow: hidden; }
 .contact-meta { list-style: none; padding: 0; margin: 40px 0 0; display: grid; gap: 14px; }
 .contact-meta li { display: flex; gap: 20px; font-size: 15px; }
 .contact-meta span { width: 124px; flex: none; font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-soft); padding-top: 4px; }
-.contact-meta a { border-bottom: 1px solid rgba(233, 211, 174, .35); transition: color .3s, border-color .3s; }
+.contact-meta a { position: relative; border-bottom: 1px solid rgba(233, 211, 174, .35); transition: color .3s, border-color .3s; }
 .contact-meta a:hover { color: var(--gold-soft); border-color: var(--gold-soft); }
 .form { display: grid; gap: 18px; padding: clamp(24px, 3vw, 40px); border-radius: 26px; background: rgba(250, 246, 240, .07); border: 1px solid rgba(250, 246, 240, .16); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .form label { display: grid; gap: 8px; }
@@ -499,7 +501,7 @@ html.locked { overflow: hidden; }
 .form input:focus, .form select:focus, .form textarea:focus { outline: none; border-color: var(--gold-soft); }
 .form .invalid { border-color: #f3a5a5; }
 .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 8px; }
-.form-alt { font-size: 14px; color: rgba(250, 246, 240, .8); text-decoration: underline; text-underline-offset: 4px; transition: color .3s; }
+.form-alt { padding-block: 10px; font-size: 14px; color: rgba(250, 246, 240, .8); text-decoration: underline; text-underline-offset: 4px; transition: color .3s; }
 .form-alt:hover { color: var(--gold-soft); }
 .form-note { min-height: 1.4em; font-size: 14px; color: var(--gold-soft); }
 .form-note a { text-decoration: underline; text-underline-offset: 3px; }
@@ -510,7 +512,12 @@ html.locked { overflow: hidden; }
 .foot { background: #1d0f24; color: rgba(250, 246, 240, .7); overflow: hidden; padding-top: 40px; border-top: 1px solid rgba(250, 246, 240, .1); }
 .foot-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; font-size: 14px; line-height: 1.9; }
 .foot-top nav { display: flex; gap: 24px; flex-wrap: wrap; }
+.foot-top a { position: relative; }
 .foot-top a:hover { color: var(--gold-soft); }
+.foot-legal { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(233, 211, 174, .16); }
+.foot-legal nav { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; opacity: .72; }
+.foot-legal a { position: relative; }
+.foot-legal a:hover { color: var(--gold-soft); opacity: 1; }
 .wordmark {
   font: italic 400 clamp(2.6rem, 13.4vw, 14rem)/.9 var(--serif);
   text-align: center; letter-spacing: -.03em; white-space: nowrap;

@@ -36,12 +36,14 @@
   const trainings = $('#trainings');
   const trPinEl = $('.tr-pin');
   const trTrack = $('#trTrack');
-  const trCards = $$('.tr-card');
-  const trImgs = trCards.map(c => $('.tr-media img', c));
+  /* Re-queried by rescan() when the activities are re-rendered from the
+     admin's data, so these never point at cards that have been replaced. */
+  let trCards = $$('.tr-card');
+  let trImgs = trCards.map(c => $('.tr-media img', c));
   const trBar = $('#trBar');
   const trCount = $('#trCount');
   const trHint = $('.tr-hint');
-  const jrs = $$('.jr').map(el => ({ el, portal: $('.jr-portal', el), img: $('.jr-portal img', el), word: $('.jr-word', el) }));
+  let jrs = $$('.jr').map(el => ({ el, portal: $('.jr-portal', el), img: $('.jr-portal img', el), word: $('.jr-word', el) }));
   const wipe = $('#wipe');
   const wipeImg = $('#wipe img');
   const apo = $('#apo');
@@ -137,8 +139,12 @@
   })(fillEl, false);
   let litCount = -1;
 
-  /* ---------- split text: headline mask reveal ---------- */
+  /* ---------- split text: headline mask reveal ----------
+     Safe to call again after new content is rendered: anything already split
+     contains a .swm mask and is skipped. */
+  function splitHeadlines() {
   $$('.split').forEach(el => {
+    if (el.querySelector('.swm')) return;
     const parts = [];
     el.childNodes.forEach(n => {
       if (n.nodeType === 3) {
@@ -167,6 +173,8 @@
       if (i < parts.length - 1) el.appendChild(document.createTextNode(' '));
     });
   });
+  }
+  splitHeadlines();
 
   /* ---------- marquee: repeat content 3× ---------- */
   marquee.innerHTML = marquee.innerHTML.repeat(3);
@@ -182,13 +190,20 @@
       io.unobserve(e.target);
     });
   }, { threshold: 0.25, rootMargin: '0px 0px -5% 0px' });
-  $$('.split, .reveal').forEach(el => {
-    if (el.classList.contains('reveal')) {
-      const sibs = [...el.parentElement.children].filter(c => c.classList.contains('reveal'));
-      el.style.transitionDelay = (sibs.indexOf(el) % 3) * 0.08 + 's';
-    }
-    RM ? el.classList.add('in') : io.observe(el);
-  });
+
+  /* Re-running this is harmless: observing the same element twice is a no-op,
+     and anything already revealed carries .in and is skipped. */
+  function observeReveals() {
+    $$('.split, .reveal').forEach(el => {
+      if (el.classList.contains('in')) return;
+      if (el.classList.contains('reveal')) {
+        const sibs = [...el.parentElement.children].filter(c => c.classList.contains('reveal'));
+        el.style.transitionDelay = (sibs.indexOf(el) % 3) * 0.08 + 's';
+      }
+      RM ? el.classList.add('in') : io.observe(el);
+    });
+  }
+  observeReveals();
 
   /* =========================================================
      Per-frame update
@@ -250,16 +265,16 @@
       marquee.style.transform = `translate3d(${mqX}px,0,0) skewX(${skew}deg)`;
     }
 
-    /* ---- manifesto word fill ---- */
+    /* ---- manifesto word fill ----
+       Class states with CSS transitions are kept in sync even off-screen;
+       otherwise a stale state fades visibly when the section scrolls back in. */
     {
       const r = fillEl.getBoundingClientRect();
-      if (r.top < vh && r.bottom > 0 || litCount < 0) {
-        const p = RM ? 1 : clamp01((vh * 0.8 - r.top) / (r.height + vh * 0.25));
-        const n = Math.round(p * fillWords.length);
-        if (n !== litCount) {
-          litCount = n;
-          fillWords.forEach((w, i) => w.classList.toggle('lit', i < n));
-        }
+      const p = RM ? 1 : clamp01((vh * 0.8 - r.top) / (r.height + vh * 0.25));
+      const n = Math.round(p * fillWords.length);
+      if (n !== litCount) {
+        litCount = n;
+        fillWords.forEach((w, i) => w.classList.toggle('lit', i < n));
       }
     }
 
@@ -297,8 +312,8 @@
       if (r.top < vh && r.bottom > 0) {
         const p = RM ? 1 : clamp01((vh * 0.6 - r.top) / r.height);
         railFill.style.transform = `scaleY(${p})`;
-        railItems.forEach(it => it.classList.toggle('hit', RM || it.getBoundingClientRect().top < vh * 0.62));
       }
+      railItems.forEach(it => it.classList.toggle('hit', RM || it.getBoundingClientRect().top < vh * 0.62));
     }
 
     /* ---- teacher trainings: vertical scroll pans the row ---- */
@@ -351,20 +366,22 @@
 
     /* ---- apothecary: images change with scroll ---- */
     {
+      const line = M.mobile ? vh * 0.72 : vh * 0.5;
+      const centers = apoSteps.map(s => { const r = s.getBoundingClientRect(); return r.top + r.height / 2; });
+      const n = centers.length;
+      let t;
+      if (line <= centers[0]) t = 0;
+      else if (line >= centers[n - 1]) t = n - 1;
+      else {
+        let i = 0;
+        while (i < n - 2 && line > centers[i + 1]) i++;
+        t = i + (line - centers[i]) / (centers[i + 1] - centers[i]);
+      }
+      if (RM) t = Math.round(t);
+      const active = Math.round(t);
+      apoSteps.forEach((s, i) => s.classList.toggle('active', i === active));
       const ar = apo.getBoundingClientRect();
       if (ar.top < vh && ar.bottom > 0) {
-        const line = M.mobile ? vh * 0.72 : vh * 0.5;
-        const centers = apoSteps.map(s => { const r = s.getBoundingClientRect(); return r.top + r.height / 2; });
-        const n = centers.length;
-        let t;
-        if (line <= centers[0]) t = 0;
-        else if (line >= centers[n - 1]) t = n - 1;
-        else {
-          let i = 0;
-          while (i < n - 2 && line > centers[i + 1]) i++;
-          t = i + (line - centers[i]) / (centers[i + 1] - centers[i]);
-        }
-        if (RM) t = Math.round(t);
         const fr = apoFrame.getBoundingClientRect();
         const ent = RM ? 1 : easeOut(clamp01((vh - fr.top) / vh));
         apoImgs.forEach((img, i) => {
@@ -377,8 +394,6 @@
           img.style.clipPath = `inset(${(1 - rev) * 100}% 0 0 0)`;
           img.style.transform = `scale(${lerp(1.18, 1, rev) + clamp01(t - i) * 0.04})`;
         });
-        const active = Math.round(t);
-        apoSteps.forEach((s, i) => s.classList.toggle('active', i === active));
         apoCount.textContent = String(active + 1).padStart(2, '0');
         apoBar.style.transform = `scaleX(${t / (n - 1)})`;
       }
@@ -426,7 +441,12 @@
   function loop(now) {
     const dt = Math.min(0.05, (now - prev) / 1000);
     prev = now;
-    update(scrollY, dt);
+    /* One bad frame must never kill the loop and leave the page frozen
+       mid-animation. Log it once and keep going. */
+    try { update(scrollY, dt); }
+    catch (e) {
+      if (!loop.warned) { loop.warned = true; console.error('[SSA] scroll update failed:', e); }
+    }
     requestAnimationFrame(loop);
   }
 
@@ -445,7 +465,22 @@
   requestAnimationFrame(loop);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 
-  window.__fx = { update, measure, M };
+  /* Called after the activity sections are re-rendered from the admin's data.
+     Re-points every cached element reference at the new DOM, re-runs the
+     headline/word splitting and reveal observers for anything new, and
+     re-measures the pinned gallery's scroll runway — which depends on the
+     track's width and so must be recomputed whenever the cards change. */
+  function rescan() {
+    trCards = $$('.tr-card');
+    trImgs = trCards.map(c => $('.tr-media img', c));
+    jrs = $$('.jr').map(el => ({ el, portal: $('.jr-portal', el), img: $('.jr-portal img', el), word: $('.jr-word', el) }));
+    splitHeadlines();
+    observeReveals();
+    measure();
+    update(scrollY, 0);
+  }
+
+  window.__fx = { update, measure, M, rescan };
 
   /* =========================================================
      Intro curtain
@@ -543,6 +578,7 @@
     const dlgBody = $('#dlgBody');
     const dlgImg = $('#dlgImg');
     const dlgWa = $('#dlgWa');
+    const dlgReg = $('#dlgReg');
     let dlgTitle = '', lastFocus = null;
     const openProgramme = card => {
       if (typeof dlg.showModal !== 'function') { setInterest(card.dataset.title); location.hash = '#contact'; return; }
@@ -551,6 +587,20 @@
       dlgBody.innerHTML = $('.tr-detail', card).innerHTML;
       const h = $('h3', dlgBody);
       if (h) h.id = 'dlgTitle';
+      /* site-activities.js leaves a hidden marker in each card carrying that
+         activity's registration link. Promote it to the primary action, and
+         fall back to the WhatsApp button when a training isn't taking names. */
+      const marker = $('[data-reg-link]', dlgBody);
+      const regHref = marker ? marker.dataset.href : '';
+      if (marker) marker.remove();
+      if (dlgReg) {
+        const closed = marker ? marker.hasAttribute('data-closed') : false;
+        dlgReg.hidden = !regHref;
+        if (regHref) dlgReg.href = regHref;
+        dlgReg.textContent = closed ? 'Ask about the next one' : 'Register for this training';
+        dlgWa.classList.toggle('btn-gold', !regHref);
+        dlgWa.classList.toggle('btn-ghost', !!regHref);
+      }
       const img = $('img', card);
       dlgImg.src = img.currentSrc || img.src;
       dlgWa.href = waLink(`Hello Manjula, I'd like to know more about the ${dlgTitle}.`);
@@ -573,7 +623,13 @@
       $('#contact').scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
       form.elements.name.focus({ preventScroll: true });
     });
-    trCards.forEach(card => card.addEventListener('click', () => openProgramme(card)));
+    /* Delegated, so cards rendered later from the admin's data open their
+       details without needing new listeners wired to them. */
+    const track = $('#trTrack');
+    if (track) track.addEventListener('click', e => {
+      const card = e.target.closest('.tr-card');
+      if (card && track.contains(card)) openProgramme(card);
+    });
   }
 
   /* =========================================================

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register — School for Self Ascension</title>
+  <meta name="description" content="Register for a teacher training, course or sacred journey with the School for Self Ascension, Chennai.">
+  <meta name="theme-color" content="#4B2459">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1.5 36 10.75v18.5L20 38.5 4 29.25v-18.5Z' fill='%234B2459'/%3E%3Cpath d='M20 11c2.4 3.3 3.6 6.3 3.6 9.1S22.4 25.5 20 28c-2.4-2.5-3.6-5.1-3.6-7.9S17.6 14.3 20 11Z' fill='%23E9D3AE'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/app.css?v=4">
+</head>
+<body class="app">
+
+  <header class="app-hdr">
+    <a class="brand" href="index.html" aria-label="School for Self Ascension home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z"/>
+        <path d="M20 11.5c2.3 3.2 3.4 6.1 3.4 8.8S22.3 25.5 20 28c-2.3-2.5-3.4-5-3.4-7.7S17.7 14.7 20 11.5Z"/>
+        <path d="M20 28c-4.3-.4-7.3-2.4-8.6-6.3 2.9-.4 5.4.3 7.6 2M20 28c4.3-.4 7.3-2.4 8.6-6.3-2.9-.4-5.4.3-7.6 2"/>
+      </svg>
+      <span class="brand-text"><small>School for</small>Self Ascension</span>
+    </a>
+    <div class="app-hdr-right">
+      <a class="app-back" href="index.html">← The website</a>
+      <div id="acctHost"></div>
+    </div>
+  </header>
+
+  <div id="demoBar"></div>
+
+  <main class="app-main">
+
+    <div class="state" id="booting">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>One moment…</p>
+    </div>
+
+    <!-- ============ Choose what to register for ============ -->
+    <section id="chooser" hidden>
+      <div class="app-head">
+        <h1>What would you like <em>to join?</em></h1>
+        <p>Choose a teacher training, a course or a sacred journey to register for.</p>
+      </div>
+      <div id="chooserList"></div>
+    </section>
+
+    <!-- ============ The form ============ -->
+    <section id="formWrap" hidden>
+      <div class="app-head">
+        <h1 id="pageTitle">Register</h1>
+        <p id="pageSub">Fill this in and Manjula will confirm your place personally.</p>
+      </div>
+
+      <div class="reg-grid">
+        <!-- left: the form -->
+        <form id="regForm" novalidate>
+
+          <fieldset id="fsDates" hidden>
+            <legend>Choose your date</legend>
+            <p class="fset-note" id="datesNote"></p>
+            <div class="pick" id="dateList"></div>
+            <p class="f-err" id="dateErr" hidden></p>
+          </fieldset>
+
+          <fieldset>
+            <legend>About you</legend>
+            <div class="f-grid two">
+              <div class="f-row">
+                <label for="rName">Your full name</label>
+                <input id="rName" name="name" type="text" autocomplete="name" autocapitalize="words" required>
+                <p class="f-err" data-err="name" hidden></p>
+              </div>
+              <div class="f-row">
+                <label for="rCertName">Name for your certificate <small>(if different)</small></label>
+                <input id="rCertName" name="certName" type="text" autocapitalize="words">
+              </div>
+            </div>
+            <div class="f-grid two" style="margin-top:15px">
+              <div class="f-row">
+                <label for="rPhone">Phone number</label>
+                <input id="rPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="98400 00000">
+                <p class="f-err" data-err="phone" hidden></p>
+                <label class="f-hint" style="display:flex;gap:8px;align-items:center;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400">
+                  <input type="checkbox" id="rIsWhatsapp" name="isWhatsapp" checked style="width:auto;margin:0">
+                  This is also my WhatsApp number
+                </label>
+              </div>
+              <div class="f-row">
+                <label for="rEmail">Email</label>
+                <input id="rEmail" name="email" type="email" inputmode="email" autocomplete="email" required>
+                <p class="f-err" data-err="email" hidden></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset id="fsAddress">
+            <legend>Where you live</legend>
+            <p class="fset-note">Manjula uses this for certificates and for posting anything you need.</p>
+            <div class="f-row">
+              <label for="rLine1">Address</label>
+              <input id="rLine1" name="line1" type="text" autocomplete="address-line1" required>
+              <p class="f-err" data-err="line1" hidden></p>
+            </div>
+            <div class="f-row" style="margin-top:15px">
+              <label for="rLine2">Area / landmark <small>(optional)</small></label>
+              <input id="rLine2" name="line2" type="text" autocomplete="address-line2">
+            </div>
+            <div class="f-grid three" style="margin-top:15px">
+              <div class="f-row">
+                <label for="rCity">City / town</label>
+                <input id="rCity" name="city" type="text" autocomplete="address-level2" required>
+                <p class="f-err" data-err="city" hidden></p>
+              </div>
+              <div class="f-row">
+                <label for="rState">State</label>
+                <input id="rState" name="state" type="text" autocomplete="address-level1">
+              </div>
+              <div class="f-row">
+                <label for="rPin">PIN code</label>
+                <input id="rPin" name="pin" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10">
+                <p class="f-err" data-err="pin" hidden></p>
+              </div>
+            </div>
+            <div class="f-row" style="margin-top:15px">
+              <label for="rCountry">Country</label>
+              <input id="rCountry" name="country" type="text" autocomplete="country-name" value="India">
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Anything else</legend>
+            <div class="f-row">
+              <label for="rNotes">Is there anything Manjula should know? <small>(optional)</small></label>
+              <textarea id="rNotes" name="notes" rows="3" placeholder="A question, or what drew you to this workshop…"></textarea>
+              <p class="f-hint">Please don't put health or medical details here — if something like that matters for
+              the workshop, tell Manjula directly and she'll note it privately.</p>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>How you'd like to pay</legend>
+            <div class="pay-methods" id="payMethods"></div>
+            <div id="payDetail"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Agreement</legend>
+            <div style="display:grid;gap:10px">
+              <label class="terms" id="termsBox">
+                <input type="checkbox" id="rTerms" name="terms">
+                <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="terms-text" id="termsText"></span>
+              </label>
+              <label class="terms" id="ageBox">
+                <input type="checkbox" id="rAge" name="age">
+                <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="terms-text">I am 18 or older. <small style="color:var(--muted)">If you're registering for someone under 18,
+                please message Manjula instead — those are arranged personally.</small></span>
+              </label>
+              <!-- Deliberately separate and never pre-ticked: agreeing to the terms
+                   is not the same as agreeing to be marketed to. -->
+              <label class="terms" style="background:#fff">
+                <input type="checkbox" id="rMarketing" name="marketing">
+                <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="terms-text">I'd also like to hear about future workshops and journeys. <small style="color:var(--muted)">Optional — you can stop at any time.</small></span>
+              </label>
+            </div>
+            <p class="f-err" data-err="terms" hidden style="margin-top:8px"></p>
+          </fieldset>
+
+          <p class="auth-error" id="formError" role="alert" hidden></p>
+
+          <button class="btn btn-gold" type="submit" id="submitBtn" style="width:100%">
+            <span class="roll"><span>Hold my place</span><span>Hold my place</span></span>
+          </button>
+          <p class="f-hint" style="text-align:center;margin-top:14px" id="loginHint">
+            You'll be asked to sign in or create an account when you confirm — it keeps your registrations in one place.
+          </p>
+          <p class="f-hint" style="text-align:center;margin-top:18px">
+            Prefer to do this over WhatsApp? <a id="waEscape" href="#" target="_blank" rel="noopener" style="color:var(--violet);text-decoration:underline;text-underline-offset:3px">Message Manjula</a>
+          </p>
+        </form>
+
+        <!-- right: what you're registering for -->
+        <aside class="reg-summary panel" id="summary"></aside>
+      </div>
+    </section>
+
+    <!-- ============ Done ============ -->
+    <section id="done" hidden>
+      <div class="done">
+        <div class="done-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h1 id="doneTitle">Your place is held</h1>
+        <p id="doneLead"></p>
+
+        <div class="panel done-card" id="doneCard"></div>
+        <div id="donePay"></div>
+
+        <div class="done-actions">
+          <a class="btn btn-ghost" href="my-registrations.html">My registrations</a>
+          <a class="btn btn-ghost" href="index.html">Back to the website</a>
+          <a class="btn btn-gold" id="doneWa" href="#" target="_blank" rel="noopener"><span class="roll"><span>Message Manjula</span><span>Message Manjula</span></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Not found ============ -->
+    <section id="notFound" hidden>
+      <div class="state panel">
+        <h3>We couldn't find that one</h3>
+        <p>It may have been taken down, or the link may be out of date.</p>
+        <a class="btn btn-gold" href="register.html"><span class="roll"><span>See what's on</span><span>See what's on</span></span></a>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/vendor/qrcode.js"></script>
+  <script src="js/config.js?v=4"></script>
+  <script src="js/seed-content.js?v=4"></script>
+  <script src="js/store.js?v=4"></script>
+  <script src="js/auth-ui.js?v=4"></script>
+  <script src="js/register.js?v=5"></script>
+</body>
+</html>
