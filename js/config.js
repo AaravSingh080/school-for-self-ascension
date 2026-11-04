@@ -19,12 +19,13 @@ window.SSA_CONFIG = {
      change mode above to 'firebase'. These values are public by design —
      what protects the data is the security rules, not this config. */
   firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''
+    apiKey: 'AIzaSyDvoqBPUa_re_GQ3dQ-h3Rms7-gGLIZpj4',
+    authDomain: 'school-for-self-ascension.firebaseapp.com',
+    projectId: 'school-for-self-ascension',
+    storageBucket: 'school-for-self-ascension.firebasestorage.app',
+    messagingSenderId: '67986288192',
+    appId: '1:67986288192:web:894c0ae368039cd59eb9a5',
+    measurementId: 'G-8FN4GS6CGG'
   },
 
   /* ---------------------------------------------------------
