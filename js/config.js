@@ -25,7 +25,16 @@ window.SSA_CONFIG = {
     storageBucket: 'school-for-self-ascension.firebasestorage.app',
     messagingSenderId: '67986288192',
     appId: '1:67986288192:web:894c0ae368039cd59eb9a5',
-    measurementId: 'G-8FN4GS6CGG'
+    measurementId: 'G-8FN4GS6CGG',
+
+    /* Which Firestore database inside the project. Firestore's own default is
+       literally named '(default)', with the brackets. The console's create
+       wizard pre-fills the Database ID box with the word 'default', and
+       accepting that makes a separate, NAMED database called 'default' - which
+       the SDK will not find unless it is told, giving a bare NOT_FOUND.
+       This project has one called 'default'. Leave this blank for a project
+       whose database really is '(default)'. */
+    databaseId: 'default'
   },
 
   /* ---------------------------------------------------------
