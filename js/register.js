@@ -183,7 +183,11 @@
 
   function renderPayMethods() {
     const p = CFG.payments || {};
-    const free = activity.price == null || Number(activity.price) === 0;
+    /* A blank price means the fee has not been set yet, which is the normal
+       state here. It does NOT mean free, and saying "no payment needed" for a
+       teacher training would be telling someone the wrong thing about money.
+       Only an explicit zero is free. */
+    const free = activity.price != null && Number(activity.price) === 0;
     const opts = [];
 
     if (!free && p.upi && p.upi.enabled && p.upi.vpa) {
@@ -193,8 +197,14 @@
       opts.push({ id: 'razorpay', title: 'Card, netbanking or UPI', sub: 'Pay securely on Razorpay' });
     }
     if (p.offline && p.offline.enabled) {
-      opts.push({ id: 'offline', title: free ? 'No payment needed' : (p.offline.label || 'Arrange with Manjula'),
-        sub: free ? 'Just hold my place' : (p.offline.note || '') });
+      opts.push({
+        id: 'offline',
+        title: free ? 'No payment needed' : (p.offline.label || 'Payment to be done after registration'),
+        sub: free ? 'Just hold my place'
+          : (activity.price == null
+              ? 'The fee for this one is on request. Hold your place now and Manjula will be in touch about it.'
+              : (p.offline.note || ''))
+      });
     }
     if (!opts.length) opts.push({ id: 'offline', title: 'Payment to be done after registration', sub: 'Manjula will be in touch about the fee and how to pay.' });
 
