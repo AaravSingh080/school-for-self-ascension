@@ -329,6 +329,7 @@
       const d = {};
       FIELDS.forEach(k => { if (f[k]) d[k] = f[k].value; });
       d.isWhatsapp = f.isWhatsapp.checked;
+      d.dialCode = ($('rDialCode') && $('rDialCode').value) || '';
       d.dateId = selectedDate ? selectedDate.id : '';
       d.payMethod = chosenMethod;
       d.owner = whoAmI();
@@ -354,17 +355,32 @@
     if (draft.isWhatsapp === false) f.isWhatsapp.checked = false;
 
     /* A signed-in visitor shouldn't retype what we already know. */
+    fillDialCodes($('rDialCode'), draft.dialCode);
+
+    /* A number we already hold may arrive as "+971 501234567". Split the code
+       back out, or the menu would say India and we would store "+91 +971...". */
+    const applyPhone = (raw) => {
+      const v = String(raw || '').trim();
+      if (!v) return;
+      const codes = ((window.SSA.util && window.SSA.util.dialCodes) || []).map(x => x.c);
+      const hit = v.startsWith('+')
+        ? codes.filter(c => v.startsWith(c)).sort((a, b) => b.length - a.length)[0]
+        : '';
+      if (hit) { $('rDialCode').value = hit; f.phone.value = digits(v.slice(hit.length)); }
+      else { f.phone.value = digits(v); }
+    };
+
     const user = window.SSA.auth.user();
     if (user) {
       if (!f.name.value) f.name.value = user.name || '';
       if (!f.email.value) f.email.value = user.email || '';
-      if (!f.phone.value) f.phone.value = user.phone || '';
+      if (!f.phone.value) applyPhone(user.phone);
     }
     window.SSA.auth.onChange(u => {
       if (!u) return;
       if (!f.name.value) f.name.value = u.name || '';
       if (!f.email.value) f.email.value = u.email || '';
-      if (!f.phone.value) f.phone.value = u.phone || '';
+      if (!f.phone.value) applyPhone(u.phone);
       $('loginHint').textContent = `Signed in as ${u.email}.`;
     });
 
@@ -394,8 +410,28 @@
       if (!/^[6-9]/.test(core)) return 'An Indian mobile number starts with 6, 7, 8 or 9.';
       return '';
     }
-    if (d.length < 7 || d.length > 15) return 'That phone number doesn\'t look right.';
+    if (d.length < 6 || d.length > 14) return 'That number does not look right for the country code chosen.';
     return '';
+  }
+
+  /* Fill the country-code menu from the shared list. India is first in that
+     list and is what the field starts on, because nearly everyone here is. */
+  function fillDialCodes(sel, selected) {
+    if (!sel || sel.dataset.done) return;
+    const codes = (window.SSA.util && window.SSA.util.dialCodes) || [{ c: '+91', n: 'India' }];
+    const want = selected || '+91';
+    sel.innerHTML = codes.map(x =>
+      '<option value="' + esc(x.c) + '"' + (x.c === want ? ' selected' : '') + '>' + esc(x.c) + ' ' + esc(x.n) + '</option>'
+    ).join('');
+    sel.dataset.done = '1';
+  }
+
+  /* What gets stored: the code and the number as one string, so a number in
+     the admin panel can be dialled without anyone guessing where it is from. */
+  function fullPhone() {
+    const code = ($('rDialCode') && $('rDialCode').value) || '';
+    const local = digits($('rPhone') ? $('rPhone').value : '');
+    return local ? (code + ' ' + local).trim() : '';
   }
 
   function emailProblem(v) {
@@ -426,7 +462,7 @@
     const country = f.country ? f.country.value : 'India';
     switch (name) {
       case 'name': return setErr('name', f.name.value.trim() ? '' : 'Please add your name.');
-      case 'phone': return setErr('phone', phoneProblem(f.phone.value, country));
+      case 'phone': return setErr('phone', phoneProblem(f.phone.value, country, $('rDialCode') && $('rDialCode').value));
       case 'email': return setErr('email', emailProblem(f.email.value));
       case 'line1': return setErr('line1', f.line1.value.trim() ? '' : 'Please add your address.');
       case 'city': return setErr('city', f.city.value.trim() ? '' : 'Please add your city or town.');
@@ -516,7 +552,7 @@
         mode: selectedDate ? selectedDate.mode : '',
         name: f.name.value,
         certName: f.certName.value,
-        phone: f.phone.value,
+        phone: fullPhone(),
         email: f.email.value,
         isWhatsapp: f.isWhatsapp.checked,
         address: {

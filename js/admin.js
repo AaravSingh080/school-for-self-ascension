@@ -639,6 +639,7 @@
     $('mrActivity').value = open[0].id;
     syncManualDates();
     $('manualError').hidden = true;
+    fillManualDialCodes();
     $('manualDlg').showModal();
     document.documentElement.classList.add('locked');
     setTimeout(() => $('mrName').focus(), 60);
@@ -653,6 +654,16 @@
     $('mrFee').textContent = a && a.price != null ? money(a.price) : 'on request';
   }
   $('mrActivity').addEventListener('change', syncManualDates);
+
+  function fillManualDialCodes() {
+    const sel = $('mrDialCode');
+    if (!sel || sel.dataset.done) return;
+    const codes = (window.SSA.util && window.SSA.util.dialCodes) || [{ c: '+91', n: 'India' }];
+    sel.innerHTML = codes.map(x =>
+      '<option value="' + esc(x.c) + '"' + (x.c === '+91' ? ' selected' : '') + '>' + esc(x.c) + ' ' + esc(x.n) + '</option>'
+    ).join('');
+    sel.dataset.done = '1';
+  }
 
   function closeManual() { $('manualDlg').close(); document.documentElement.classList.remove('locked'); }
   $('manualClose').addEventListener('click', closeManual);
@@ -674,7 +685,9 @@
         enteredByAdmin: true,
         activityId: $('mrActivity').value,
         dateId: $('mrDate').value,
-        name: f.name.value, phone: f.phone.value, email: f.email.value,
+        name: f.name.value,
+        phone: f.phone.value.trim() ? (($('mrDialCode').value || '') + ' ' + f.phone.value.replace(/\D+/g, '')).trim() : '',
+        email: f.email.value,
         address: { line1: f.line1.value, city: f.city.value, country: 'India' },
         notes: f.notes.value,
         confirmedAdult: f.adult.checked,
