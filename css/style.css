@@ -1,6 +1,16 @@
 /* =========================================================
-   School for Self Ascension — styles
+   School for Self Ascension styles
    ========================================================= */
+
+/* The browser's own rule for [hidden] is display:none at the lowest possible
+   priority, so ANY class that sets display beats it. Several here do - .btn is
+   inline-flex, .auth-field and .f-row are grid - which left elements marked
+   hidden fully visible: the account menu sat permanently open under the header
+   showing the signed-in email and a Sign out link, the sign-in dialog showed
+   two fields it then ignored, and a dead button appeared on the not-found
+   panel. One rule fixes all of them. */
+[hidden] { display: none !important; }
+
 :root {
   --cream: #FAF6F0;
   --paper: #F3EBE1;
