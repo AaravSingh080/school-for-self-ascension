@@ -23,7 +23,7 @@
   const heroCaption = $('#heroCaption');
   const heroWordL = $('.hw-l');
   const heroWordR = $('.hw-r');
-  const heroFaders = [$('.hero-eyebrow'), $('#heroSub'), $('#heroCue')];
+  const heroFaders = [$('#heroSub'), $('#heroCue')].filter(Boolean);
   const marquee = $('#marquee');
   const fillEl = $('#fill');
   const healing = $('#healing');

@@ -1,5 +1,5 @@
 /* =========================================================
-   School for Self Ascension — seed content
+   School for Self Ascension seed content
    ---------------------------------------------------------
    The activities that currently live hardcoded in index.html, lifted into
    data so the admin panel can own them.
@@ -9,7 +9,7 @@
    It also doubles as the offline fallback: if the database can't be reached,
    the public site renders from here and still looks complete.
 
-   `id` values are permanent — registrations point at them. Never reuse or
+   `id` values are permanent: registrations point at them. Never reuse or
    rename an id; retire an activity by setting published:false instead.
    ========================================================= */
 window.SSA_SEED = {
@@ -80,7 +80,7 @@ window.SSA_SEED = {
       listTitle: 'In this training',
       list: [
         'Connect with the celestial dragons',
-        'Learn — and teach — about them',
+        'Learn about them, and learn to teach them',
         "Spread the Dragons' light",
         'Clearing & healing',
         '…and more'
@@ -148,9 +148,9 @@ window.SSA_SEED = {
       kicker: 'Teacher training',
       image: 'assets/img/tr-ascension.webp',
       imageAlt: 'A figure meditating on a mountain ridge above the clouds as a column of light rises',
-      cardText: 'Learn to walk — and teach — the Ascension path.',
+      cardText: 'Learn to walk the Ascension path, and to teach it.',
       modes: ['in-person', 'online'],
-      lead: 'Do you want to lead your own workshops and teach others about Ascension? Learn to walk — and teach — the Ascension path.',
+      lead: 'Do you want to lead your own workshops and teach others about Ascension? Learn to walk it, and learn to teach it.',
       body: [],
       listTitle: "What you'll learn",
       list: [
@@ -180,9 +180,9 @@ window.SSA_SEED = {
       kicker: 'Teacher training',
       image: 'assets/img/tr-violet-flame.webp',
       imageAlt: 'A luminous violet flame rising in darkness',
-      cardText: 'Learn — and teach others — to transform.',
+      cardText: 'Learn to transform, and to teach others.',
       modes: ['online', 'in-person'],
-      lead: 'Learn — and teach others — to transform.',
+      lead: 'Learn to transform, and to teach others.',
       body: [],
       listTitle: "What you'll learn",
       list: [
@@ -190,7 +190,7 @@ window.SSA_SEED = {
         'The inner self, the Inner Child and the Shadow self',
         'Abundance, material and spiritual',
         'Your relationship with the physical self and the chakras',
-        'A variety of activities and visualisations to heal, uncord and transform — and how to teach them',
+        'A variety of activities and visualisations to heal, uncord and transform, and how to teach them',
         'The Violet Flame and its variations as tools for transformation',
         'Walking the Ascension Pathway',
         'Connecting with the soul and its purpose'
@@ -213,8 +213,8 @@ window.SSA_SEED = {
          stays out of the trainings gallery to avoid showing twice. Any new
          course Manjula adds appears in the gallery by default. */
       showInGallery: false,
-      title: 'Sound Healing — Advance Therapy',
-      fullTitle: 'The Art & Science of Sound Healing — Advance Therapy',
+      title: 'Sound Healing: Advance Therapy',
+      fullTitle: 'The Art & Science of Sound Healing: Advance Therapy',
       kicker: 'Advance therapy course',
       image: 'assets/img/workshop-circle.webp',
       imageAlt: 'A group meditating in a circle around singing bowls and a lit diya in a bright studio',
@@ -225,7 +225,7 @@ window.SSA_SEED = {
       listTitle: 'Supports your development',
       list: ['Mental', 'Physical', 'Emotional', 'Spiritual'],
       note: '',
-      accreditation: 'Sound Healing & Gong Mastery — IASH',
+      accreditation: 'Sound Healing & Gong Mastery, IASH',
       dates: [],
       price: null,
       seats: null,
@@ -238,8 +238,8 @@ window.SSA_SEED = {
       section: 'journeys',
       order: 10,
       published: true,
-      title: 'Egypt — Sacred Spiritual Tour',
-      fullTitle: 'Egypt — Sacred Spiritual Tour',
+      title: 'Egypt, a Sacred Spiritual Tour',
+      fullTitle: 'Egypt, a Sacred Spiritual Tour',
       kicker: 'Sacred journey',
       image: 'assets/img/jr-egypt.webp',
       imageAlt: 'Camel riders silhouetted before the Great Pyramids of Giza at sunset',
@@ -277,16 +277,16 @@ window.SSA_SEED = {
       order: 20,
       published: true,
       title: 'A Journey Towards Self',
-      fullTitle: "A Journey Towards Self — a retreat at Mahavatar Babaji's Cave with Diana Cooper",
+      fullTitle: "A Journey Towards Self: a retreat at Mahavatar Babaji's Cave with Diana Cooper",
       kicker: 'Sacred journey',
       image: 'assets/img/jr-babaji-cave.webp',
       imageAlt: 'A rock cave entrance with marigold garlands on a misty forested Himalayan mountainside',
-      cardText: "A retreat at Mahavatar Babaji's Cave in Uttarakhand with Diana Cooper — the path which leads towards the light.",
+      cardText: "A retreat at Mahavatar Babaji's Cave in Uttarakhand with Diana Cooper. The path which leads towards the light.",
       modes: ['in-person'],
       subtitle: "A retreat at Mahavatar Babaji's Cave with Diana Cooper · The path which leads towards the light",
       location: 'Uttarakhand, Himalayas',
       duration: '6 days',
-      lead: "A spiritual journey to Babaji's Cave in Uttarakhand, in the Himalayas — a part of the Sanjeevini Hills.",
+      lead: "A spiritual journey to Babaji's Cave in Uttarakhand, in the Himalayas, a part of the Sanjeevini Hills.",
       body: [],
       listTitle: '',
       list: [

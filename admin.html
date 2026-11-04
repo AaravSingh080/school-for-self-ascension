@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin — School for Self Ascension</title>
+  <title>Admin · School for Self Ascension</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#4B2459">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1.5 36 10.75v18.5L20 38.5 4 29.25v-18.5Z' fill='%234B2459'/%3E%3Cpath d='M20 11c2.4 3.3 3.6 6.3 3.6 9.1S22.4 25.5 20 28c-2.4-2.5-3.6-5.1-3.6-7.9S17.6 14.3 20 11Z' fill='%23E9D3AE'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=8">
   <link rel="stylesheet" href="css/app.css?v=4">
 </head>
 <body class="app">
@@ -72,6 +72,7 @@
         <div class="panel">
           <div class="panel-head">
             <h2>What's on the website</h2>
+            <button class="mini" type="button" id="refreshTextBtn" title="Update the wording to match the text built into the site">Update wording</button>
             <button class="btn btn-gold" type="button" id="addBtn"><span class="roll"><span>+ Add an activity</span><span>+ Add an activity</span></span></button>
           </div>
           <p class="panel-note" id="actNote">These appear on the homepage in their section. Hiding one removes it from the website but keeps every registration.</p>
@@ -200,7 +201,7 @@
 
       <fieldset>
         <legend>Dates on offer</legend>
-        <p class="fset-note">Add a row for each date people can choose. Leave empty if there's no date yet — people can still register their interest.</p>
+        <p class="fset-note">Add a row for each date people can choose. Leave empty if there's no date yet, and people can still register their interest.</p>
         <div class="date-rows" id="dateRows"></div>
         <button class="mini" type="button" id="addDate" style="margin-top:12px">+ Add a date</button>
       </fieldset>
@@ -267,7 +268,7 @@
       <div class="f-row">
         <label for="mrActivity">Which activity</label>
         <select id="mrActivity" name="activityId"></select>
-        <p class="f-hint">Fee: <span id="mrFee">—</span></p>
+        <p class="f-hint">Fee: <span id="mrFee">Not set</span></p>
       </div>
       <div class="f-row" id="mrDateRow" style="margin-top:15px">
         <label for="mrDate">Date</label>
@@ -313,7 +314,7 @@
         <input type="checkbox" id="mrAdult" name="adult">
         <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
         <span class="terms-text">I confirm they are 18 or over. Leave this unticked if you
-        haven't asked — the record will say so rather than claim it.</span>
+        haven't asked, and the record will say so rather than claim it.</span>
       </label>
 
       <p class="auth-error" id="manualError" role="alert" hidden></p>
@@ -326,10 +327,10 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=7"></script>
-  <script src="js/seed-content.js?v=5"></script>
-  <script src="js/store.js?v=10"></script>
-  <script src="js/auth-ui.js?v=6"></script>
-  <script src="js/admin.js?v=7"></script>
+  <script src="js/config.js?v=8"></script>
+  <script src="js/seed-content.js?v=6"></script>
+  <script src="js/store.js?v=11"></script>
+  <script src="js/auth-ui.js?v=7"></script>
+  <script src="js/admin.js?v=8"></script>
 </body>
 </html>

@@ -81,10 +81,10 @@
       $('demoBar').innerHTML = `
         <div class="demo-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-          <span><strong>Demo mode — not a live system.</strong> Everything here is saved in this browser only:
+          <span><strong>Demo mode. Not a live system.</strong> Everything here is saved in this browser only:
           nobody else can see it and it won't appear on the real website.
           ${window.SSA.fellBack ? '<strong>The live database could not be reached.</strong> ' : ''}
-          This page also isn't protected yet — in demo mode anyone can reach it in their own browser, though they'd
+          This page also isn't protected yet. In demo mode anyone can reach it in their own browser, though they'd
           only ever see their own copy. Real protection comes from <code>firestore.rules</code> when you go live.</span>
         </div>`;
     }
@@ -136,7 +136,7 @@
     if (note) {
       note.hidden = !registrations.truncated;
       note.textContent = registrations.truncated
-        ? `Showing the ${registrations.length} most recent registrations. Older ones are still saved — use the search box, or download the spreadsheet, to reach them.`
+        ? `Showing the ${registrations.length} most recent registrations. Older ones are still saved. Use the search box, or download the spreadsheet, to reach them.`
         : '';
     }
   }
@@ -163,10 +163,10 @@
     }
     return `<div class="demo-bar"><span><strong>The database refused this account.</strong>
       That is almost always one of two things.
-      <strong>1.</strong> The security rules have not been published yet — open
+      <strong>1.</strong> The security rules have not been published yet. Open
       <code>firestore.rules</code>, paste it into Firebase → Firestore Database → Rules, and press Publish.
       <strong>2.</strong> The <code>adminUid()</code> line in those rules does not match this account.
-      This account's ID is <code>${esc(uid)}</code> — it has to be exactly what
+      This account's ID is <code>${esc(uid)}</code>, and it has to be exactly what
       <code>adminUid()</code> returns. Compare it with Firebase → Authentication → Users.</span></div>`;
   }
 
@@ -192,7 +192,7 @@
       /* On a freshly connected database this is the very first screen, so give
          her the one-press way to fill it rather than ten activities to retype. */
       host.innerHTML = `<div class="state"><h3>Nothing here yet</h3>
-        <p>Add your first activity and it will appear on the website — or start from the ones already written for the site.</p>
+        <p>Add your first activity and it will appear on the website, or start from the ones already written for the site.</p>
         <button class="btn btn-gold" type="button" id="seedBtn"><span class="roll"><span>Add the starting activities</span><span>Add the starting activities</span></span></button></div>`;
       $('seedBtn').addEventListener('click', async e => {
         const btn = e.currentTarget;
@@ -263,7 +263,7 @@
        registrations pointing at nothing — someone who paid, with no record of
        what for. Hiding does everything deleting was wanted for. */
     if (regs) {
-      alert(`"${a.fullTitle || a.title}" can't be deleted — ${regs} ${regs === 1 ? 'person has' : 'people have'} registered for it.\n\n` +
+      alert(`"${a.fullTitle || a.title}" can't be deleted. ${regs} ${regs === 1 ? 'person has' : 'people have'} registered for it.\n\n` +
         `Deleting it would leave their registrations pointing at something that no longer exists.\n\n` +
         `Use "Hide" instead: it comes off the website immediately and keeps every registration intact.`);
       return;
@@ -293,7 +293,7 @@
         <input type="date" data-k="start" value="${esc(d.start)}" aria-label="Start date">
         <input type="date" data-k="end" value="${esc(d.end)}" aria-label="End date">
         <select data-k="mode" aria-label="In person or online">
-          <option value=""${!d.mode ? ' selected' : ''}>—</option>
+          <option value=""${!d.mode ? ' selected' : ''}>Not set</option>
           <option value="in-person"${d.mode === 'in-person' ? ' selected' : ''}>In person</option>
           <option value="online"${d.mode === 'online' ? ' selected' : ''}>Online</option>
         </select>
@@ -361,6 +361,34 @@
   dlg.addEventListener('click', e => { if (e.target === dlg) closeEditor(); });
   $('addBtn').addEventListener('click', () => openEditor(null));
 
+  /* The wording people read lives in the database, so a copy change in the
+     files reaches nobody until it is pushed here. It shows exactly what would
+     change before changing it, because this overwrites text and she may have
+     reworded some of it herself. */
+  $('refreshTextBtn').addEventListener('click', async () => {
+    let diff;
+    try { diff = await window.SSA.activities.seedDiff(); }
+    catch (e) { return toast(e.message || 'Could not check the wording.', true); }
+    if (!diff.length) return toast('The wording already matches.');
+
+    const lines = diff
+      .map(d => '\u2022 ' + (d.title || d.id) + '  (' + d.changes.map(c => c.field).join(', ') + ')')
+      .join('\n');
+    const n = diff.length;
+    const ok = confirm(
+      'Update the wording on ' + n + ' ' + (n === 1 ? 'activity' : 'activities') +
+      ' to match the text built into the site?\n\n' + lines + '\n\n' +
+      'Dates, fees, seats, and whether each one is showing or taking registrations are NOT touched.\n\n' +
+      'Anything you reworded yourself on these will be replaced.');
+    if (!ok) return;
+
+    try {
+      const count = await window.SSA.activities.applySeedText(diff.map(d => d.id));
+      toast('Wording updated on ' + count + ' ' + (count === 1 ? 'activity' : 'activities') + '.');
+      load();
+    } catch (e) { toast(e.message || 'Could not update the wording.', true); }
+  });
+
   const lines = v => String(v || '').split('\n').map(s => s.trim()).filter(Boolean);
 
   form.addEventListener('submit', async e => {
@@ -410,7 +438,7 @@
     try {
       await window.SSA.activities.save(next);
       closeEditor();
-      toast(editing ? 'Saved.' : 'Added — it\'s on the website now.');
+      toast(editing ? 'Saved.' : 'Added. It\'s on the website now.');
       load();
     } catch (ex) {
       err.textContent = ex.message || 'Could not save.'; err.hidden = false;
@@ -468,7 +496,7 @@
           ${esc(r.activityTitle)}
           <br><span class="ref-code" style="font-size:12px">${esc(r.ref || '')}</span>
         </td>
-        <td>${esc(r.dateLabel || '—')}${r.mode ? `<br><span style="font-size:12px;color:var(--muted)">${esc(r.mode)}</span>` : ''}</td>
+        <td>${esc(r.dateLabel || 'No date chosen')}${r.mode ? `<br><span style="font-size:12px;color:var(--muted)">${esc(r.mode)}</span>` : ''}</td>
         <td>
           <span class="pill ${PAY_PILL[st] || 'pill-unpaid'}">${esc(PAY_LABEL[st] || st)}</span>
           <br><span style="font-size:12.5px">${amt == null ? 'On request' : money(amt)}</span>
@@ -503,7 +531,7 @@
     const msg = `Confirm that money has actually arrived for ${r.name}?\n\n` +
       `${r.activityTitle}\nReference: ${r.ref}\nExpected: ${expected == null ? 'on request' : money(expected)}` +
       `${r.payment && r.payment.utr ? `\nThey gave UTR: ${r.payment.utr}` : ''}\n\n` +
-      `Check this against your bank or Razorpay dashboard first — this marks it as really paid.`;
+      `Check this against your bank or Razorpay dashboard first. This marks it as really paid.`;
     if (!confirm(msg)) return;
     try {
       await window.SSA.registrations.confirmPaid(id, {});
@@ -574,22 +602,22 @@
       ${row('Address', esc([a.line1, a.line2, a.city, a.state, a.pin, a.country].filter(Boolean).join(', ')))}
       ${row('They wrote', esc(r.notes))}
       ${row('Fee', p.amountExpected == null ? 'On request' : money(p.amountExpected))}
-      ${row('Received', p.amountReceived == null ? '—' : money(p.amountReceived))}
+      ${row('Received', p.amountReceived == null ? 'Nothing yet' : money(p.amountReceived))}
       ${row('Payment', esc(PAY_LABEL[p.state] || p.state) + (p.method ? ' · ' + esc(p.method) : ''))}
       ${row('UTR / payment id', esc(p.utr || p.providerPaymentId))}
       ${row('Registered', fmtDate(r.createdAt) + ' (' + esc(daysAgo(r.createdAt)) + ')')}
-      ${r.enteredByAdmin ? row('Entered by', esc(r.enteredBy) + ' — booked off the website') : ''}
+      ${r.enteredByAdmin ? row('Entered by', esc(r.enteredBy) + ', booked off the website') : ''}
       <div class="panel" style="margin-top:20px;background:var(--cream)">
         <p class="dlg-kicker">Consent record</p>
-        ${row('Agreed', r.termsAccepted ? (r.consentMode === 'verbal' ? 'Yes — given verbally, entered by the school' : 'Yes — ticked the box on the website') : 'No record')}
+        ${row('Agreed', r.termsAccepted ? (r.consentMode === 'verbal' ? 'Yes, given verbally, entered by the school' : 'Yes, ticked the box on the website') : 'No record')}
         ${row('When', fmtDate(r.termsAcceptedAt))}
         ${row('Terms version', esc(r.termsVersion))}
         ${row('Confirmed 18+', r.confirmedAdult ? 'Yes' : 'Not recorded')}
-        ${row('Marketing', r.marketingOptIn ? 'Opted in — may be contacted about future workshops' : 'Not opted in — do not send marketing')}
+        ${row('Marketing', r.marketingOptIn ? 'Opted in, may be contacted about future workshops' : 'Not opted in, do not send marketing')}
       </div>
       ${Array.isArray(p.history) && p.history.length ? `<div style="margin-top:18px">
         <p class="dlg-kicker">What happened</p>
-        <ul class="dlg-list">${p.history.map(h => `<li>${esc(PAY_LABEL[(h && h.state) || ''] || (h && h.state) || 'Unknown')} — ${fmtDate(h && h.at)} · ${esc((h && h.by) || 'unknown')}</li>`).join('')}</ul></div>` : ''}`;
+        <ul class="dlg-list">${p.history.map(h => `<li>${esc(PAY_LABEL[(h && h.state) || ''] || (h && h.state) || 'Unknown')} · ${fmtDate(h && h.at)} · ${esc((h && h.by) || 'unknown')}</li>`).join('')}</ul></div>` : ''}`;
     $('detailDlg').showModal();
     document.documentElement.classList.add('locked');
   }
@@ -620,7 +648,7 @@
     const a = activities.find(x => x.id === $('mrActivity').value);
     const dates = (a && a.dates) || [];
     $('mrDateRow').hidden = !dates.length;
-    $('mrDate').innerHTML = '<option value="">— no particular date —</option>' +
+    $('mrDate').innerHTML = '<option value="">No particular date</option>' +
       dates.map(d => `<option value="${esc(d.id)}">${esc(d.label)}</option>`).join('');
     $('mrFee').textContent = a && a.price != null ? money(a.price) : 'on request';
   }
