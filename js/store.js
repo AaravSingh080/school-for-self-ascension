@@ -260,7 +260,16 @@
     let fb = {}, auth = null, db = null, profile = null;
     let listeners = [];
 
-    const shape = u => u ? { uid: u.uid, email: u.email, name: (profile && profile.name) || u.displayName || '', phone: (profile && profile.phone) || '' } : null;
+    /* An account created in the Firebase console has no displayName and no
+       users/{uid} profile, which is exactly how Manjula's is made during
+       go-live. Falling back to the part before the @ keeps the header and the
+       audit trail readable instead of blank. */
+    const shape = u => u ? {
+      uid: u.uid,
+      email: u.email,
+      name: (profile && profile.name) || u.displayName || String(u.email || '').split('@')[0] || 'Account',
+      phone: (profile && profile.phone) || ''
+    } : null;
     const emit = () => { const u = shape(auth && auth.currentUser); listeners.forEach(fn => { try { fn(u); } catch (e) { console.error(e); } }); };
 
     /* Firebase surfaces technical error codes; turn them into something a
