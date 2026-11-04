@@ -13,7 +13,7 @@
    rename an id; retire an activity by setting published:false instead.
    ========================================================= */
 window.SSA_SEED = {
-  version: 1,
+  version: 2,
 
   activities: [
     /* ---------------- Teacher trainings ---------------- */
@@ -276,32 +276,32 @@ window.SSA_SEED = {
       section: 'journeys',
       order: 20,
       published: true,
-      title: "Mahavatar Babaji's Cave",
-      fullTitle: "Mahavatar Babaji's Cave",
+      title: 'A Journey Towards Self',
+      fullTitle: "A Journey Towards Self — a retreat at Mahavatar Babaji's Cave with Diana Cooper",
       kicker: 'Sacred journey',
       image: 'assets/img/jr-babaji-cave.webp',
       imageAlt: 'A rock cave entrance with marigold garlands on a misty forested Himalayan mountainside',
-      cardText: "A spiritual journey to Babaji's Cave in Uttarakhand, in the Himalayas — a part of the Sanjeevini Hills.",
+      cardText: "A retreat at Mahavatar Babaji's Cave in Uttarakhand with Diana Cooper — the path which leads towards the light.",
       modes: ['in-person'],
-      subtitle: 'The path which leads towards the light',
+      subtitle: "A retreat at Mahavatar Babaji's Cave with Diana Cooper · The path which leads towards the light",
       location: 'Uttarakhand, Himalayas',
-      duration: '',
+      duration: '6 days',
       lead: "A spiritual journey to Babaji's Cave in Uttarakhand, in the Himalayas — a part of the Sanjeevini Hills.",
       body: [],
       listTitle: '',
       list: [
-        "Meditation on the Guru Mandala at Mahavatar Babaji's Cave",
-        'A visit to the sacred site where initiation happens',
-        'Celebrate and experience your connection with your Buddha-self',
-        "Immerse in nature at Sri Durga Maa's Temple, Dunagiri",
+        'Celebrate your connection with Mahavatar Babaji',
+        "Meditate on the Guru Mandala at Mahavatar Babaji's Cave in Uttarakhand, India",
+        'Visit the sacred site where initiation happens',
+        "Immerse in nature at Sri Durga Maa's Temple and Kasar Devi Temple",
         'Deep silence on the Ascension path',
-        'Food for the body, mind and soul'
+        'Kumaoni food for the mind, body and soul'
       ],
       quote: 'It is inside this cave that the great Mahavatar Babaji initiated his disciple Shyam Charan Lahiri into the ancient meditation system of Kriya Yoga, in 1861.',
       note: '',
       accreditation: '',
       dates: [
-        { id: 'd1', label: 'May 2026', start: '2026-05-01', end: '', mode: 'in-person', seats: null }
+        { id: 'd2027', label: '01 – 06 March 2027', start: '2027-03-01', end: '2027-03-06', mode: 'in-person', seats: null }
       ],
       price: null,
       seats: null,
