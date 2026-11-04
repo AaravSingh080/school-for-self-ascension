@@ -10,9 +10,10 @@ rules_version = '2';
    their own browser, so nothing in js/ can be trusted to enforce anything.
    These rules run on Google's servers, where a visitor cannot reach them.
 
-   BEFORE YOU PUBLISH: replace the UID on the ADMIN_UID line below.
-   Find it in Firebase console → Authentication → Users → the "User UID" column
-   for Manjula's account. It looks like: K2mWq9xYzAbCdEfGhIjKlMnOpQr1
+   adminUid() below is already set to Manjula's account. If her account is ever
+   deleted and recreated, the UID changes: copy the new one from Firebase
+   console → Authentication → Users → the "User UID" column, put it here, and
+   publish again.
 
    Why a UID and not the email: an email can be changed by the account holder
    in some flows, and `admins` in js/config.js only decides what the screen
