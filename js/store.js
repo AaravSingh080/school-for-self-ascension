@@ -33,6 +33,9 @@
 
   const TERMS_VERSION = '2026-11-01';
 
+  /* How many registrations the admin panel pulls at once. */
+  const REG_PAGE = 300;
+
   /* ---------------------------------------------------------
      PAYMENT STATES
      The public page may only ever move a registration along the first three.
@@ -238,8 +241,12 @@
         return readLS(LS.registrations, []).filter(r => r.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       },
 
-      async allRegistrations() {
-        return readLS(LS.registrations, []).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      async allRegistrations(max) {
+        const cap = Number(max) || REG_PAGE;
+        const all = readLS(LS.registrations, []).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const out = all.slice(0, cap);
+        out.truncated = all.length > cap;
+        return out;
       },
 
       async updateRegistration(id, patch) {
@@ -417,11 +424,26 @@
         } catch (e) { throw friendly(e); }
       },
 
-      async allRegistrations() {
+      /* Bounded on purpose. An unlimited getDocs means the admin panel's cost
+         and load time grow with every registration ever taken, and one bad
+         actor filling the collection would make the panel unopenable - taking
+         Manjula's access to the real registrations with it. Newest first,
+         because that is what she is looking for; the count comes back too so
+         the screen can say when it is not showing everything. */
+      async allRegistrations(max) {
         try {
-          const snap = await fb.fs.getDocs(fb.fs.collection(db, 'registrations'));
+          const cap = Number(max) || REG_PAGE;
+          const q = fb.fs.query(
+            fb.fs.collection(db, 'registrations'),
+            fb.fs.orderBy('createdAt', 'desc'),
+            fb.fs.limit(cap + 1)                 /* one extra tells us there are more */
+          );
+          const snap = await fb.fs.getDocs(q);
           const out = []; snap.forEach(d => out.push(Object.assign({ id: d.id }, d.data())));
-          return out.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+          const more = out.length > cap;
+          if (more) out.pop();
+          out.truncated = more;                  /* read by the admin panel */
+          return out;
         } catch (e) { throw friendly(e); }
       },
 
@@ -454,6 +476,19 @@
         fellBackToDemo = true;
         driver = demoDriver();
         await driver.init();
+        /* The fallback keeps the site readable when the database cannot be
+           reached. It must not keep accepting accounts, because this is a LIVE
+           site: a real person would type their real password into a form that
+           then SHA-256s it into localStorage on a possibly shared computer, and
+           the account they thought they made would not exist. Refusing is the
+           honest answer; the pages already offer WhatsApp instead. */
+        const unavailable = () => {
+          throw new Error('The booking system is not reachable just now. Nothing has been saved. Please message Manjula and she will register you herself.');
+        };
+        driver.signUp = unavailable;
+        driver.signIn = unavailable;
+        driver.resetPassword = unavailable;
+        driver.createRegistration = unavailable;
       }
     } else {
       driver = demoDriver();
@@ -561,7 +596,11 @@
           /* Kept separate from the terms: consenting to the contract is not
              consenting to marketing, and DPDP treats them as different things. */
           marketingOptIn: !!input.marketingOptIn,
-          confirmedAdult: !!input.confirmedAdult || byHand,
+          /* Was 'input.confirmedAdult || byHand', which made every hand-entered
+             booking assert "Confirmed 18+: Yes" whether or not anyone had
+             confirmed it. The consent record is evidence; it has to say what
+             actually happened, and Manjula's form has its own box for this. */
+          confirmedAdult: !!input.confirmedAdult,
           enteredByAdmin: byHand,
           enteredBy: byHand ? (user.email || 'admin') : '',
 

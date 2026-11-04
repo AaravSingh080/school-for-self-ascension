@@ -110,6 +110,7 @@
               <tbody id="regBody"></tbody>
             </table>
           </div>
+          <p class="panel-note" id="regTruncated" hidden></p>
           <div class="state" id="regEmpty" hidden>
             <h3>No registrations yet</h3>
             <p>When somebody registers for a workshop they'll appear here, with their contact details and whether they've paid.</p>
@@ -308,6 +309,13 @@
         This is recorded as consent given verbally.</span>
       </label>
 
+      <label class="terms" style="margin-top:10px;background:#fff">
+        <input type="checkbox" id="mrAdult" name="adult">
+        <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+        <span class="terms-text">I confirm they are 18 or over. Leave this unticked if you
+        haven't asked — the record will say so rather than claim it.</span>
+      </label>
+
       <p class="auth-error" id="manualError" role="alert" hidden></p>
       <div class="dlg-actions">
         <button class="btn btn-gold" type="submit"><span class="roll"><span>Add registration</span><span>Add registration</span></span></button>
@@ -320,8 +328,8 @@
 
   <script src="js/config.js?v=7"></script>
   <script src="js/seed-content.js?v=5"></script>
-  <script src="js/store.js?v=9"></script>
-  <script src="js/auth-ui.js?v=5"></script>
-  <script src="js/admin.js?v=6"></script>
+  <script src="js/store.js?v=10"></script>
+  <script src="js/auth-ui.js?v=6"></script>
+  <script src="js/admin.js?v=7"></script>
 </body>
 </html>

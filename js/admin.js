@@ -129,6 +129,16 @@
 
     const denied = [actRes, regRes].filter(x => x.status === 'rejected');
     renderLoadProblem(denied.map(x => x.reason));
+
+    /* The panel reads a bounded page, so say so rather than quietly showing a
+       subset of the registrations and letting her believe it is all of them. */
+    const note = $('regTruncated');
+    if (note) {
+      note.hidden = !registrations.truncated;
+      note.textContent = registrations.truncated
+        ? `Showing the ${registrations.length} most recent registrations. Older ones are still saved — use the search box, or download the spreadsheet, to reach them.`
+        : '';
+    }
   }
 
   function renderLoadProblem(errors) {
@@ -577,9 +587,9 @@
         ${row('Confirmed 18+', r.confirmedAdult ? 'Yes' : 'Not recorded')}
         ${row('Marketing', r.marketingOptIn ? 'Opted in — may be contacted about future workshops' : 'Not opted in — do not send marketing')}
       </div>
-      ${(p.history || []).length ? `<div style="margin-top:18px">
+      ${Array.isArray(p.history) && p.history.length ? `<div style="margin-top:18px">
         <p class="dlg-kicker">What happened</p>
-        <ul class="dlg-list">${p.history.map(h => `<li>${esc(PAY_LABEL[h.state] || h.state)} — ${fmtDate(h.at)} · ${esc(h.by)}</li>`).join('')}</ul></div>` : ''}`;
+        <ul class="dlg-list">${p.history.map(h => `<li>${esc(PAY_LABEL[(h && h.state) || ''] || (h && h.state) || 'Unknown')} — ${fmtDate(h && h.at)} · ${esc((h && h.by) || 'unknown')}</li>`).join('')}</ul></div>` : ''}`;
     $('detailDlg').showModal();
     document.documentElement.classList.add('locked');
   }
@@ -639,6 +649,7 @@
         name: f.name.value, phone: f.phone.value, email: f.email.value,
         address: { line1: f.line1.value, city: f.city.value, country: 'India' },
         notes: f.notes.value,
+        confirmedAdult: f.adult.checked,
         paymentMethod: 'offline'
       });
       closeManual();
