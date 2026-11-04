@@ -88,8 +88,8 @@ window.SSA_CONFIG = {
        "arrange payment with Manjula". */
     offline: {
       enabled: true,
-      label: 'Arrange payment with Manjula',
-      note: 'Manjula will message you on WhatsApp to arrange payment.'
+      label: 'Payment to be done after registration',
+      note: 'Hold your place now. Manjula will be in touch about the fee and how to pay.'
     }
   },
 
