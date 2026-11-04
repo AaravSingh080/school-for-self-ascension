@@ -21,6 +21,74 @@
 
   let dlg = null, pending = null, lastFocus = null;
 
+  /* =========================================================
+     Sign-in throttle
+     ---------------------------------------------------------
+     Be clear about what this is and is not. Firebase Auth applies its own
+     anti-abuse on the server, and that is the protection that actually counts:
+     a scripted attacker calls Google's endpoint directly and never loads this
+     file. What a client-side throttle genuinely buys you is the case that
+     happens far more often than a scripted attack - somebody at a shared
+     laptop, or a guessing passer-by, working through the form by hand - and it
+     stops this site hammering the Auth API on their behalf.
+
+     Keyed per email so one person's lockout never blocks another on a shared
+     device, and the counter is deliberately in localStorage: clearing it is
+     trivial for anyone determined, which is exactly why the server-side limits
+     remain the real answer.
+     ========================================================= */
+  const LOCK_KEY = 'ssa.signin.attempts';
+  const FREE_TRIES = 4;            /* typos happen; don't punish the first few */
+  const FIRST_LOCK_MS = 30 * 1000;
+  const MAX_LOCK_MS = 15 * 60 * 1000;
+
+  const lockStore = {
+    read() {
+      try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || {}; }
+      catch (e) { return {}; }     /* private browsing, blocked storage */
+    },
+    write(v) {
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify(v)); } catch (e) {}
+    }
+  };
+
+  const lockKeyFor = email => String(email || '').trim().toLowerCase();
+
+  /* Milliseconds still to wait for this email, or 0. */
+  function lockedFor(email) {
+    const rec = lockStore.read()[lockKeyFor(email)];
+    if (!rec || !rec.until) return 0;
+    return Math.max(0, rec.until - Date.now());
+  }
+
+  function noteFailure(email) {
+    const key = lockKeyFor(email);
+    if (!key) return;
+    const all = lockStore.read();
+    const rec = all[key] || { fails: 0, until: 0 };
+    rec.fails += 1;
+    if (rec.fails > FREE_TRIES) {
+      /* Double the wait each time past the free tries, up to the ceiling. */
+      const step = Math.min(rec.fails - FREE_TRIES - 1, 10);
+      rec.until = Date.now() + Math.min(FIRST_LOCK_MS * Math.pow(2, step), MAX_LOCK_MS);
+    }
+    all[key] = rec;
+    lockStore.write(all);
+  }
+
+  function clearFailures(email) {
+    const all = lockStore.read();
+    delete all[lockKeyFor(email)];
+    lockStore.write(all);
+  }
+
+  function waitWording(ms) {
+    const secs = Math.ceil(ms / 1000);
+    if (secs < 60) return secs + (secs === 1 ? ' second' : ' seconds');
+    const mins = Math.ceil(secs / 60);
+    return mins + (mins === 1 ? ' minute' : ' minutes');
+  }
+
   const MARKUP = `
     <form class="auth-form" id="authForm" novalidate>
       <button class="dlg-close" id="authClose" type="button" aria-label="Close">
@@ -126,13 +194,23 @@
       i.focus();
     });
 
+    let lastReset = 0;
     $('authForgot').addEventListener('click', async () => {
       const email = form.elements.email.value.trim();
       if (!email) { setError('Enter your email address above, then tap this again.'); form.elements.email.focus(); return; }
+      /* Each press sends mail to whatever address is typed, which need not be
+         the presser's own. A cooldown keeps the button from being a nuisance. */
+      if (Date.now() - lastReset < 60000) {
+        setError('A reset email has just been sent. Please check your inbox, including spam, before asking for another.');
+        return;
+      }
+      lastReset = Date.now();
       try {
         await window.SSA.auth.resetPassword(email);
         setError('');
-        $('authLead').textContent = 'Check your email — we\'ve sent a link to set a new password.';
+        /* Deliberately not "we found your account": that would confirm to a
+           stranger whether an address is registered with the school. */
+        $('authLead').textContent = 'If there is an account for that address, a link to set a new password is on its way. Check your inbox, including spam.';
       } catch (e) { setError(e.message); }
     });
 
@@ -153,16 +231,37 @@
         setError('Please enter a password of at least 6 characters.'); f.password.focus(); return;
       }
 
+      /* Only sign-in is throttled. Throttling sign-up would lock someone out of
+         creating the account they do not yet have - a worse problem - and
+         repeated sign-ups are already bounded by Firebase's own quota. */
+      if (mode === 'signin') {
+        const wait = lockedFor(f.email.value);
+        if (wait > 0) {
+          setError('Too many attempts for this email. Please wait ' + waitWording(wait) +
+            ', or use the forgotten-password link below.');
+          return;
+        }
+      }
+
       btn.disabled = true;
       btn.querySelectorAll('.roll span').forEach(s => { s.textContent = mode === 'signup' ? 'Creating…' : 'Signing in…'; });
       try {
         const user = mode === 'signup'
           ? await window.SSA.auth.signUp({ name: f.name.value, email: f.email.value, password: f.password.value, phone: f.phone.value })
           : await window.SSA.auth.signIn({ email: f.email.value, password: f.password.value });
+        clearFailures(f.email.value);
         form.reset();
         close(true, user);
       } catch (ex) {
-        setError(ex.message || 'Something went wrong. Please try again.');
+        /* A wrong password counts towards the lockout; being offline does not,
+           or a bad connection would lock someone out of their own account. */
+        const wrongCredentials = /password|credential|user-not-found|match/i.test(ex.message || '');
+        if (mode === 'signin' && wrongCredentials) noteFailure(f.email.value);
+        const wait = mode === 'signin' ? lockedFor(f.email.value) : 0;
+        setError(wait > 0
+          ? 'That email and password do not match, and there have now been several attempts. Please wait ' +
+            waitWording(wait) + ', or use the forgotten-password link below.'
+          : (ex.message || 'Something went wrong. Please try again.'));
         btn.disabled = false;
         btn.querySelectorAll('.roll span').forEach(s => { s.textContent = mode === 'signup' ? 'Create account' : 'Sign in'; });
       }
