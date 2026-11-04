@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=9">
-  <link rel="stylesheet" href="css/app.css?v=5">
+  <link rel="stylesheet" href="css/app.css?v=6">
 </head>
 <body class="app">
 
@@ -281,7 +281,10 @@
       <div class="f-grid two" style="margin-top:15px">
         <div class="f-row">
           <label for="mrPhone">Phone</label>
-          <input id="mrPhone" name="phone" type="tel" inputmode="tel" maxlength="28">
+          <div class="f-phone">
+            <select id="mrDialCode" name="dialCode" aria-label="Country code"></select>
+            <input id="mrPhone" name="phone" type="tel" inputmode="tel" maxlength="20">
+          </div>
         </div>
         <div class="f-row">
           <label for="mrEmail">Email</label>
@@ -329,8 +332,8 @@
 
   <script src="js/config.js?v=10"></script>
   <script src="js/seed-content.js?v=6"></script>
-  <script src="js/store.js?v=13"></script>
+  <script src="js/store.js?v=14"></script>
   <script src="js/auth-ui.js?v=7"></script>
-  <script src="js/admin.js?v=9"></script>
+  <script src="js/admin.js?v=10"></script>
 </body>
 </html>

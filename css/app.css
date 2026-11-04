@@ -409,3 +409,13 @@ table.adm .who span { color: var(--muted); font-size: 12.5px; }
 }
 .pay-only strong { font-weight: 600; }
 .pay-only span { color: var(--muted); font-size: 14.5px; }
+
+/* Country code and number as one control. The code is as narrow as it can be
+   while still showing "+971" without clipping, because the number is the part
+   people are actually typing. */
+.f-phone { display: grid; grid-template-columns: 104px 1fr; gap: 8px; align-items: start; }
+.f-phone select { min-width: 0; }
+.f-phone input { min-width: 0; }
+@media (max-width: 420px) {
+  .f-phone { grid-template-columns: 92px 1fr; gap: 6px; }
+}

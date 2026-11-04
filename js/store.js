@@ -768,6 +768,67 @@
           .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       },
 
+      /* Dial codes for the phone field, shared so the public form and the
+         admin's hand-entry form cannot drift apart. India first because
+         almost everyone here is in India; the rest alphabetical, and a browser
+         select lets you type a few letters to jump. Not every country on
+         earth - the ones a Chennai school plausibly hears from, which is most
+         of the diaspora and everywhere the journeys go. */
+      dialCodes: [
+        { c: '+91',  n: 'India' },
+        { c: '+61',  n: 'Australia' },
+        { c: '+973', n: 'Bahrain' },
+        { c: '+880', n: 'Bangladesh' },
+        { c: '+32',  n: 'Belgium' },
+        { c: '+55',  n: 'Brazil' },
+        { c: '+1',   n: 'Canada' },
+        { c: '+86',  n: 'China' },
+        { c: '+45',  n: 'Denmark' },
+        { c: '+20',  n: 'Egypt' },
+        { c: '+358', n: 'Finland' },
+        { c: '+33',  n: 'France' },
+        { c: '+49',  n: 'Germany' },
+        { c: '+30',  n: 'Greece' },
+        { c: '+852', n: 'Hong Kong' },
+        { c: '+62',  n: 'Indonesia' },
+        { c: '+353', n: 'Ireland' },
+        { c: '+972', n: 'Israel' },
+        { c: '+39',  n: 'Italy' },
+        { c: '+81',  n: 'Japan' },
+        { c: '+254', n: 'Kenya' },
+        { c: '+965', n: 'Kuwait' },
+        { c: '+60',  n: 'Malaysia' },
+        { c: '+230', n: 'Mauritius' },
+        { c: '+52',  n: 'Mexico' },
+        { c: '+977', n: 'Nepal' },
+        { c: '+31',  n: 'Netherlands' },
+        { c: '+64',  n: 'New Zealand' },
+        { c: '+47',  n: 'Norway' },
+        { c: '+968', n: 'Oman' },
+        { c: '+92',  n: 'Pakistan' },
+        { c: '+63',  n: 'Philippines' },
+        { c: '+351', n: 'Portugal' },
+        { c: '+974', n: 'Qatar' },
+        { c: '+7',   n: 'Russia' },
+        { c: '+966', n: 'Saudi Arabia' },
+        { c: '+65',  n: 'Singapore' },
+        { c: '+27',  n: 'South Africa' },
+        { c: '+82',  n: 'South Korea' },
+        { c: '+34',  n: 'Spain' },
+        { c: '+94',  n: 'Sri Lanka' },
+        { c: '+46',  n: 'Sweden' },
+        { c: '+41',  n: 'Switzerland' },
+        { c: '+66',  n: 'Thailand' },
+        { c: '+90',  n: 'Turkey' },
+        { c: '+256', n: 'Uganda' },
+        { c: '+971', n: 'United Arab Emirates' },
+        { c: '+44',  n: 'United Kingdom' },
+        { c: '+1',   n: 'United States' },
+        { c: '+84',  n: 'Vietnam' },
+        { c: '+260', n: 'Zambia' },
+        { c: '+263', n: 'Zimbabwe' }
+      ],
+
       /* escape() is right for text but says nothing about a URL: it leaves
          javascript:alert(1) untouched, because those characters are harmless
          as text. Anything that ends up in an href needs this instead, which
