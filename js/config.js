@@ -89,7 +89,7 @@ window.SSA_CONFIG = {
     offline: {
       enabled: true,
       label: 'Payment to be done after registration',
-      note: 'Hold your place now. Manjula will be in touch about the fee and how to pay.'
+      note: 'Hold your place now. We will be in touch about the fee and how to pay.'
     }
   },
 
@@ -104,6 +104,6 @@ window.SSA_CONFIG = {
     privacyUrl: 'privacy.html',
     refundUrl: 'refunds.html',
     /* Message shown on the confirmation screen. */
-    confirmationNote: 'Manjula reads every registration personally and will be in touch.'
+    confirmationNote: 'Every registration is read personally, and we will be in touch.'
   }
 };

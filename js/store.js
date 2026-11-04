@@ -304,10 +304,10 @@
         'unavailable': 'Couldn\'t reach the database. Please check your connection and try again.',
         /* What a half-finished Firebase project actually produces. Without
            these the raw SDK string reaches the visitor. */
-        'auth/operation-not-allowed': 'Email sign-in is not switched on for this site yet. Please message Manjula.',
-        'auth/unauthorized-domain': 'This web address is not authorised for sign-in yet. Please message Manjula.',
-        'auth/invalid-api-key': 'This site has not finished connecting to its database. Please message Manjula.',
-        'failed-precondition': 'The database is not ready yet. Please message Manjula.',
+        'auth/operation-not-allowed': 'Email sign-in is not switched on for this site yet. Please contact the school.',
+        'auth/unauthorized-domain': 'This web address is not authorised for sign-in yet. Please contact the school.',
+        'auth/invalid-api-key': 'This site has not finished connecting to its database. Please contact the school.',
+        'failed-precondition': 'The database is not ready yet. Please contact the school.',
         'not-found': 'That record no longer exists.',
         'resource-exhausted': 'The site is busy just now. Please try again in a few minutes.'
       };
@@ -491,7 +491,7 @@
            the account they thought they made would not exist. Refusing is the
            honest answer; the pages already offer WhatsApp instead. */
         const unavailable = () => {
-          throw new Error('The booking system is not reachable just now. Nothing has been saved. Please message Manjula and she will register you herself.');
+          throw new Error('The booking system is not reachable just now. Nothing has been saved. Please message us and we will register you ourselves.');
         };
         driver.signUp = unavailable;
         driver.signIn = unavailable;
