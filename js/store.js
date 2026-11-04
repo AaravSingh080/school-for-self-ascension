@@ -311,7 +311,14 @@
         fb = { app, authMod, fs };
         const application = app.initializeApp(cfg);
         auth = authMod.getAuth(application);
-        db = fs.getFirestore(application);
+        /* Firestore's own default database is named '(default)'. A project
+           can also hold named databases, and the console's create wizard
+           pre-fills its Database ID box with the word 'default' - so accepting
+           it yields a database the plain getFirestore(app) will never find.
+           cfg.databaseId names it when that has happened. */
+        db = cfg.databaseId
+          ? fs.getFirestore(application, cfg.databaseId)
+          : fs.getFirestore(application);
         await new Promise(resolve => {
           const stop = authMod.onAuthStateChanged(auth, async user => {
             profile = null;

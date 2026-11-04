@@ -30,6 +30,16 @@ before anything tries to use the database.
 4. Find **Firestore Database** → **Create database** → **Firestore in Native
    mode** → **Production mode**, location **asia-south1 (Mumbai)**.
    ⚠️ *The location can never be changed later.*
+
+   Two traps on that screen:
+   - The **Database ID** box is pre-filled with the word `default`. Firestore's
+     real default database is named `(default)`, **with the brackets**.
+     Accepting the pre-filled text makes a separate, *named* database that the
+     site will not find — you get a bare `NOT_FOUND` and nothing works. If that
+     happens, do not redo the database: set `firebase.databaseId` in
+     `js/config.js` to the name you actually created. (This project has one
+     called `default`, and `databaseId` is set accordingly.)
+   - The **Location** box is pre-filled with a US region. Change it.
 5. **Project settings** (gear) → **Your apps** → the **`</>`** web icon →
    nickname `website` → **Register app**.
 6. Copy the `firebaseConfig = { ... }` block it shows you.
