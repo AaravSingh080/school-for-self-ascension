@@ -54,7 +54,15 @@
   async function boot() {
     await window.SSA.ready;
 
-    if (window.SSA.isDemo) {
+    if (window.SSA.fellBack) {
+      $('demoBar').innerHTML = `
+        <div class="demo-bar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+          <span><strong>The booking system is not reachable just now.</strong> Anything you fill in here
+          will not reach the school. Please reload in a moment, or message Manjula and she will register
+          you herself.</span>
+        </div>`;
+    } else if (window.SSA.isDemo) {
       $('demoBar').innerHTML = `
         <div class="demo-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
@@ -615,5 +623,18 @@
     }
   }
 
-  boot();
+  /* Any failure in boot() used to leave the page sitting on "One moment..."
+     for ever - no message, no way out, on the one page where someone is trying
+     to give the school money. Land on the existing failure panel instead, with
+     the WhatsApp escape showing. */
+  boot().catch(e => {
+    console.error('[SSA] register page could not start:', e);
+    const t = $('notFoundTitle'), b = $('notFoundText'), wa = $('notFoundWa');
+    if (t) t.textContent = 'We could not load this just now';
+    if (b) b.textContent = (e && /permission|unavailable|network/i.test(e.message || ''))
+      ? 'The booking system is not reachable at the moment. Nothing has been sent. Please message Manjula and she will register you herself.'
+      : 'Something went wrong loading this page. Nothing has been sent. Please message Manjula and she will register you herself.';
+    if (wa) { wa.href = waLink('Hello Manjula, I tried to register on the website but it would not load.'); wa.hidden = false; }
+    show('notFound');
+  });
 })();

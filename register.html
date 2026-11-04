@@ -71,18 +71,18 @@
             <div class="f-grid two">
               <div class="f-row">
                 <label for="rName">Your full name</label>
-                <input id="rName" name="name" type="text" autocomplete="name" autocapitalize="words" required>
+                <input id="rName" name="name" type="text" autocomplete="name" autocapitalize="words" maxlength="100" required>
                 <p class="f-err" data-err="name" hidden></p>
               </div>
               <div class="f-row">
                 <label for="rCertName">Name for your certificate <small>(if different)</small></label>
-                <input id="rCertName" name="certName" type="text" autocapitalize="words">
+                <input id="rCertName" name="certName" type="text" autocapitalize="words" maxlength="100">
               </div>
             </div>
             <div class="f-grid two" style="margin-top:15px">
               <div class="f-row">
                 <label for="rPhone">Phone number</label>
-                <input id="rPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="98400 00000">
+                <input id="rPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="28" required placeholder="98400 00000">
                 <p class="f-err" data-err="phone" hidden></p>
                 <label class="f-hint" style="display:flex;gap:8px;align-items:center;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400">
                   <input type="checkbox" id="rIsWhatsapp" name="isWhatsapp" checked style="width:auto;margin:0">
@@ -91,7 +91,7 @@
               </div>
               <div class="f-row">
                 <label for="rEmail">Email</label>
-                <input id="rEmail" name="email" type="email" inputmode="email" autocomplete="email" required>
+                <input id="rEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="180" required>
                 <p class="f-err" data-err="email" hidden></p>
               </div>
             </div>
@@ -135,7 +135,7 @@
             <legend>Anything else</legend>
             <div class="f-row">
               <label for="rNotes">Is there anything Manjula should know? <small>(optional)</small></label>
-              <textarea id="rNotes" name="notes" rows="3" placeholder="A question, or what drew you to this workshop…"></textarea>
+              <textarea id="rNotes" name="notes" rows="3" maxlength="1900" placeholder="A question, or what drew you to this workshop…"></textarea>
               <p class="f-hint">Please don't put health or medical details here — if something like that matters for
               the workshop, tell Manjula directly and she'll note it privately.</p>
             </div>
@@ -213,9 +213,12 @@
     <!-- ============ Not found ============ -->
     <section id="notFound" hidden>
       <div class="state panel">
-        <h3>We couldn't find that one</h3>
-        <p>It may have been taken down, or the link may be out of date.</p>
-        <a class="btn btn-gold" href="register.html"><span class="roll"><span>See what's on</span><span>See what's on</span></span></a>
+        <h3 id="notFoundTitle">We couldn't find that one</h3>
+        <p id="notFoundText">It may have been taken down, or the link may be out of date.</p>
+        <div class="dlg-actions" style="justify-content:center">
+          <a class="btn btn-gold" href="register.html"><span class="roll"><span>See what's on</span><span>See what's on</span></span></a>
+          <a class="btn btn-ghost" id="notFoundWa" href="#" target="_blank" rel="noopener" hidden>Message Manjula on WhatsApp</a>
+        </div>
       </div>
     </section>
   </main>
@@ -225,8 +228,8 @@
   <script src="js/vendor/qrcode.js"></script>
   <script src="js/config.js?v=4"></script>
   <script src="js/seed-content.js?v=5"></script>
-  <script src="js/store.js?v=5"></script>
+  <script src="js/store.js?v=6"></script>
   <script src="js/auth-ui.js?v=4"></script>
-  <script src="js/register.js?v=5"></script>
+  <script src="js/register.js?v=6"></script>
 </body>
 </html>

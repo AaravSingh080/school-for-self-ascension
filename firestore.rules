@@ -23,6 +23,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* ----- who is who ----- */
+    /* Until this is replaced with a real UID, nobody is an admin: the string
+       below can never equal a real request.auth.uid. The admin panel will say
+       so on screen rather than simply appearing broken. */
     function adminUid() {
       return 'REPLACE_WITH_MANJULA_UID';
     }
@@ -54,7 +57,14 @@ service cloud.firestore {
        'paid', 'refunded' and 'waived' are claims about money arriving, and the
        only honest source for those is Manjula checking her own bank. */
     function visitorPayState(s) {
-      return s in ['unpaid', 'initiated', 'claimed'];
+      return s in ['unpaid', 'initiated', 'claimed', 'cancelled'];
+    }
+
+    /* Facts about money arriving, which only Manjula can establish. Once a
+       registration is in one of these, the visitor can no longer touch it.
+       KEEP THIS LIST IDENTICAL TO `ADMIN_ONLY` in js/store.js. */
+    function adminOnlyPayState(s) {
+      return s in ['paid', 'refunded', 'waived', 'failed', 'expired'];
     }
 
     /* =====================================================
@@ -89,6 +99,18 @@ service cloud.firestore {
          and home address, which is the worst outcome this system can have. */
       allow read: if isAdmin() || isOwner(existing().userId);
 
+      /* CREATE by Manjula — someone who booked over WhatsApp, typed in by hand.
+         The open-registration and price checks are visitor protections and do
+         not apply to her: she is often entering exactly the booking that came
+         in after a workshop closed, at a fee she agreed herself. What still
+         holds is that she cannot conjure a record that is already paid. */
+      allow create: if isAdmin()
+        && incoming().userId == request.auth.uid
+        && incoming().payment.state == 'unpaid'
+        && incoming().status == 'pending'
+        && incoming().payment.amountReceived == null
+        && incoming().payment.verifiedBy == '';
+
       /* CREATE: a signed-in person registering themselves. */
       allow create: if isSignedIn()
         /* you may only create a registration that belongs to you */
@@ -107,6 +129,9 @@ service cloud.firestore {
         && incoming().termsAccepted == true
         && incoming().termsVersion is string
         && incoming().confirmedAdult == true
+        /* and may not dress their own registration up as one Manjula entered */
+        && incoming().enteredByAdmin == false
+        && incoming().enteredBy == ''
         /* keep the fields sane */
         && incoming().name is string && incoming().name.size() > 0 && incoming().name.size() < 120
         && incoming().email is string && incoming().email.size() < 200
@@ -126,11 +151,30 @@ service cloud.firestore {
         && incoming().payment.amountReceived == existing().payment.amountReceived
         && incoming().payment.verifiedBy == existing().payment.verifiedBy
         && incoming().payment.verifiedAt == existing().payment.verifiedAt
-        /* and they can only move it to a state a visitor is allowed to set */
-        && visitorPayState(incoming().payment.state)
+        /* The state check fires only when the state actually changes. Checked
+           unconditionally it would reject an ordinary edit — correcting a phone
+           number — purely because Manjula had already marked the record paid. */
+        && (incoming().payment.state == existing().payment.state
+            || visitorPayState(incoming().payment.state))
         && incoming().status in ['pending', 'cancelled']
-        /* a confirmed registration can't be quietly rewritten */
-        && existing().payment.state != 'paid'
+        /* Once Manjula has settled the money, the visitor is out. Checking only
+           for 'paid' let someone walk a waived or refunded record back to
+           'claimed' and re-open a question that was closed. */
+        && !adminOnlyPayState(existing().payment.state)
+        /* The consent record is evidence, not a preference. These are what the
+           school would have to produce if a registration were ever disputed, so
+           they are fixed at the moment of registering. Name, email, phone,
+           address, notes and marketing choice stay editable — those are the
+           registrant's own details and they should be able to correct them. */
+        && incoming().termsAccepted == existing().termsAccepted
+        && incoming().termsAcceptedAt == existing().termsAcceptedAt
+        && incoming().termsVersion == existing().termsVersion
+        && incoming().consentMode == existing().consentMode
+        && incoming().confirmedAdult == existing().confirmedAdult
+        && incoming().enteredByAdmin == existing().enteredByAdmin
+        && incoming().enteredBy == existing().enteredBy
+        && incoming().activityTitle == existing().activityTitle
+        && incoming().createdAt == existing().createdAt
         && incoming().payment.utr.size() < 60;
 
       /* UPDATE by Manjula — she is the one who reconciles money, so she may
