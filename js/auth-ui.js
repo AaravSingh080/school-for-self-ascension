@@ -100,7 +100,7 @@
       <p class="auth-lead" id="authLead">Sign in to register for a workshop.</p>
 
       <div class="auth-demo" id="authDemo" hidden>
-        <strong>Demo mode.</strong> This account is saved in this browser only —
+        <strong>Demo mode.</strong> This account is saved in this browser only,
         it won't work on another device, and nobody else can see it.
       </div>
 

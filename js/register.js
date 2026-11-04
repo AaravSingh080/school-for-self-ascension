@@ -66,7 +66,7 @@
       $('demoBar').innerHTML = `
         <div class="demo-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-          <span><strong>Demo mode.</strong> This is a preview — registrations are saved in this browser only and don't reach the school.
+          <span><strong>Demo mode.</strong> This is a preview. Registrations are saved in this browser only and don't reach the school.
           Nothing you enter here is sent anywhere.</span>
         </div>`;
     }
@@ -133,7 +133,7 @@
       <ul class="rs-meta">
         ${meta.map(([k, v]) => `<li><span>${esc(k)}</span>${esc(v)}</li>`).join('')}
         <li><span>Fee</span>${a.price == null
-          ? 'On request — Manjula will tell you'
+          ? 'On request, Manjula will tell you'
           : `<span class="rs-price">${money(a.price)}</span>`}</li>
       </ul>`;
   }
@@ -159,7 +159,7 @@
           <span class="pick-mark" aria-hidden="true"></span>
           <span class="pick-body">
             <span class="pick-title">${esc(d.label || d.start)}${modeLabel ? `<span class="pick-tag">${esc(modeLabel)}</span>` : ''}</span>
-            ${past ? '<span class="pick-sub">This date has passed — ask about the next one</span>'
+            ${past ? '<span class="pick-sub">This date has passed. Ask about the next one</span>'
                    : d.seats ? '<span class="pick-sub">Limited places</span>' : ''}
           </span>
         </label>`;
@@ -233,7 +233,7 @@
   }
 
   function renderForm() {
-    document.title = `Register — ${activity.fullTitle || activity.title}`;
+    document.title = `Register · ${activity.fullTitle || activity.title}`;
     $('pageTitle').innerHTML = `Register for <em>${esc(activity.title)}</em>`;
     $('pageSub').textContent = activity.registrationOpen
       ? 'Fill this in and Manjula will confirm your place personally.'
@@ -247,7 +247,7 @@
 
     if (!activity.registrationOpen) {
       $('regForm').querySelectorAll('input, select, textarea, button').forEach(el => { el.disabled = true; });
-      $('formError').textContent = 'Registration is closed for this one just now — message Manjula to hear when it next runs.';
+      $('formError').textContent = 'Registration is closed for this one just now. Message Manjula to hear when it next runs.';
       $('formError').hidden = false;
     }
 
@@ -452,7 +452,7 @@
       await window.SSA_Auth.require({ mode: 'signin' });
     } catch (err) {
       submitting = false;
-      $('formError').textContent = 'You\'ll need an account to hold a place — everything you typed has been kept.';
+      $('formError').textContent = 'You\'ll need an account to hold a place, and everything you typed has been kept.';
       $('formError').hidden = false;
       return;
     }
@@ -487,7 +487,7 @@
          duplicate — a second registration is worse than a moment's doubt. */
       const unsure = /timeout|network|unavailable|reach/i.test(ex.message || '');
       $('formError').innerHTML = unsure
-        ? 'We couldn\'t confirm your registration was saved. <strong>Please don\'t send it again</strong> — ' +
+        ? 'We couldn\'t confirm your registration was saved. <strong>Please don\'t send it again</strong>. ' +
           'check <a href="my-registrations.html" style="text-decoration:underline">My registrations</a> first, ' +
           'or message Manjula on WhatsApp.'
         : esc(ex.message || 'Something went wrong. Please try again.');
@@ -506,7 +506,7 @@
 
     $('doneLead').textContent = amount == null
       ? `Thank you, ${r.name.split(' ')[0]}. Manjula will be in touch about the fee and to confirm everything.`
-      : `Thank you, ${r.name.split(' ')[0]}. Your place is held while you pay — Manjula confirms every registration herself.`;
+      : `Thank you, ${r.name.split(' ')[0]}. Your place is held while you pay. Manjula confirms every registration herself.`;
 
     $('doneCard').innerHTML = `
       <div class="done-row"><span>Reference</span><strong class="ref-code">${esc(r.ref)}</strong></div>
@@ -516,7 +516,7 @@
       <div class="done-row"><span>Phone</span>${esc(r.phone)}</div>
       <div class="done-row"><span>Email</span>${esc(r.email)}</div>
       <div class="done-row"><span>Fee</span>${amount == null ? 'On request' : money(amount)}</div>
-      <div class="done-row"><span>Status</span><span class="pill pill-pending">Held — awaiting confirmation</span></div>`;
+      <div class="done-row"><span>Status</span><span class="pill pill-pending">Held, awaiting confirmation</span></div>`;
 
     $('doneWa').href = waLink(`Hello Manjula, I've just registered for ${r.activityTitle} (${r.ref}).`);
 
@@ -524,7 +524,7 @@
        without saying that would be a lie on the one screen people trust most. */
     if (window.SSA.isDemo) {
       $('doneTitle').textContent = 'This is a preview';
-      $('doneLead').innerHTML = '<strong>Nothing has been sent.</strong> This is a demonstration of how registering will work — ' +
+      $('doneLead').innerHTML = '<strong>Nothing has been sent.</strong> This is a demonstration of how registering will work. ' +
         'your details were saved in this browser only and the school has not received them. ' +
         'To register for real, message Manjula.';
     }
@@ -548,7 +548,7 @@
     if (r.payment.method === 'razorpay' && activity.payPageUrl) {
       host.innerHTML = `<div class="panel done-card" style="margin-top:18px">
         <div class="pay-amount"><span>To pay</span><strong>${money(amount)}</strong></div>
-        <p class="pay-off">Pay securely on Razorpay's own page — by card, netbanking or UPI.
+        <p class="pay-off">Pay securely on Razorpay's own page, by card, netbanking or UPI.
         Please quote <strong class="ref-code">${esc(r.ref)}</strong> if it asks for a note.</p>
         <a class="btn btn-gold upi-open" id="rzpGo" href="${esc(window.SSA.util.safeUrl(activity.payPageUrl))}" target="_blank" rel="noopener">
           <span class="roll"><span>Pay ${esc(money(amount))}</span><span>Pay ${esc(money(amount))}</span></span></a>
@@ -569,7 +569,7 @@
 
     host.innerHTML = `<div class="panel done-card" style="margin-top:18px">
       <div class="pay-amount"><span>To pay by UPI</span><strong>${money(amount)}</strong></div>
-      ${!vpa ? `<p class="pay-off">Manjula will send you the UPI details — her UPI ID hasn't been added to the site yet.</p>`
+      ${!vpa ? `<p class="pay-off">Manjula will send you the UPI details, as her UPI ID hasn't been added to the site yet.</p>`
       : `<div class="upi-wrap">
           <div class="upi-qr" id="qrBox"><span class="upi-qr-fallback">Preparing QR…</span></div>
           <div>
@@ -591,7 +591,7 @@
             <label for="utr">Paid already? Enter your UPI reference number</label>
             <input id="utr" type="text" inputmode="numeric" placeholder="12-digit UPI / UTR number">
             <p class="f-hint">You'll find it in your UPI app's history as "UPI transaction ID" or "UTR".
-            This tells Manjula to look for your payment — she confirms it against her bank.</p>
+            This tells Manjula to look for your payment, and she confirms it against her bank.</p>
           </div>
           <button class="btn btn-ghost" type="button" id="claimBtn" style="margin-top:12px">I've paid</button>
           <p class="f-hint" id="claimMsg" style="margin-top:10px"></p>
@@ -623,7 +623,7 @@
         await window.SSA.registrations.claimPayment(r.id, utr);
         $('claimBtn').disabled = true;
         $('claimMsg').innerHTML = '<strong>Thank you.</strong> Manjula will check this against her bank and confirm your place.';
-        toast('Noted — thank you.');
+        toast('Noted, thank you.');
       } catch (e) { $('claimMsg').textContent = e.message; }
     });
   }

@@ -73,7 +73,7 @@
   function writeLS(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); return true; }
     catch (e) {
-      console.error('[SSA] Could not save — browser storage is full or blocked.', e);
+      console.error('[SSA] Could not save: browser storage is full or blocked.', e);
       throw new Error('STORAGE_UNAVAILABLE');
     }
   }
@@ -537,6 +537,54 @@
          to register for. Adds the built-in activities to whichever store is
          active and skips any id that is already there, so it is safe to press
          twice. Returns how many were added. */
+      /* The wording a visitor reads lives in the database, not in the files, so
+         editing js/seed-content.js changes nothing on a live site. These two
+         close that gap: seedDiff() says what the built-in text would change,
+         and applySeedText() applies it.
+
+         Only WORDING is touched. Dates, price, seats, order, image, published
+         and registrationOpen are Manjula's operational decisions and are left
+         exactly as she set them - rewording a workshop must never quietly
+         republish one she had hidden or reopen one she had closed. */
+      get TEXT_FIELDS() {
+        return ['title', 'fullTitle', 'kicker', 'subtitle', 'cardText', 'lead',
+                'body', 'listTitle', 'list', 'quote', 'note', 'accreditation',
+                'imageAlt', 'location', 'duration'];
+      },
+
+      async seedDiff() {
+        const same = (a, b) => JSON.stringify(a == null ? '' : a) === JSON.stringify(b == null ? '' : b);
+        const live = await driver.listActivities();
+        const byId = new Map(live.map(a => [a.id, a]));
+        const out = [];
+        (SEED.activities || []).forEach(seed => {
+          const mine = byId.get(seed.id);
+          if (!mine) return;                       /* not here; importSeed adds those */
+          const changes = window.SSA.activities.TEXT_FIELDS
+            .filter(k => !same(mine[k], seed[k]))
+            .map(k => ({ field: k, from: mine[k], to: seed[k] }));
+          if (changes.length) out.push({ id: seed.id, title: mine.title || seed.title, changes });
+        });
+        return out;
+      },
+
+      async applySeedText(ids) {
+        const wanted = ids && ids.length ? new Set(ids) : null;
+        const live = await driver.listActivities();
+        const byId = new Map(live.map(a => [a.id, a]));
+        let n = 0;
+        for (const seed of (SEED.activities || [])) {
+          if (wanted && !wanted.has(seed.id)) continue;
+          const mine = byId.get(seed.id);
+          if (!mine) continue;
+          const next = Object.assign({}, mine);
+          window.SSA.activities.TEXT_FIELDS.forEach(k => { next[k] = seed[k]; });
+          await driver.saveActivity(next);
+          n++;
+        }
+        return n;
+      },
+
       async importSeed() {
         const have = new Set((await driver.listActivities()).map(a => a.id));
         const fresh = (SEED.activities || []).filter(a => a && a.id && !have.has(a.id));

@@ -25,9 +25,12 @@
 
   const MODE_LABEL = { 'in-person': 'In person', online: 'Online' };
 
+  /* Plain text, not markup: every caller runs it through esc(), and a
+     pre-escaped '&amp;' would then be escaped a second time and show up on the
+     page as the entity itself. */
   function modeLine(a) {
     const m = (a.modes || []).map(x => MODE_LABEL[x] || x).filter(Boolean);
-    return m.length ? m.join(' &amp; ') : '';
+    return m.length ? m.join(' & ') : '';
   }
 
   function money(v) {
@@ -40,7 +43,7 @@
   function trainingCard(a, i) {
     const kicker = a.kicker || 'Teacher training';
     const detail = `
-      <p class="dlg-kicker">${esc(kicker)}${modeLine(a) ? ' · ' + modeLine(a) : ''}</p>
+      ${modeLine(a) ? `<p class="dlg-kicker">${esc(modeLine(a))}</p>` : ''}
       <h3>${esc(a.fullTitle || a.title)}</h3>
       ${a.lead ? `<p class="dlg-lead">${esc(a.lead)}</p>` : ''}
       ${(a.body || []).map(p => `<p>${esc(p)}</p>`).join('')}
@@ -49,7 +52,7 @@
       ${a.note ? `<p class="dlg-note">${esc(a.note)}</p>` : ''}
       ${a.price != null || (a.dates || []).length ? `<p class="dlg-list-title" style="margin-top:24px">Dates &amp; fee</p>
         <ul class="dlg-list">
-          ${(a.dates || []).map(d => `<li>${esc(d.label)}${d.mode ? ' — ' + esc(MODE_LABEL[d.mode] || d.mode) : ''}</li>`).join('')}
+          ${(a.dates || []).map(d => `<li>${esc(d.label)}${d.mode ? ' · ' + esc(MODE_LABEL[d.mode] || d.mode) : ''}</li>`).join('')}
           ${a.price != null ? `<li>${esc(money(a.price))}</li>` : ''}
         </ul>` : ''}`;
 
@@ -57,7 +60,7 @@
       <article class="tr-card" data-title="${esc(a.fullTitle || a.title)}" data-id="${esc(a.id)}">
         <div class="tr-media">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.imageAlt)}" loading="lazy">` : ''}</div>
         <div class="tr-body">
-          <p class="tr-kicker"><span>${esc(kicker)}</span><span>${String(i + 1).padStart(2, '0')}</span></p>
+          <p class="tr-kicker"><span>${esc(modeLine(a) || kicker)}</span><span>${String(i + 1).padStart(2, '0')}</span></p>
           <h3>${esc(a.title)}</h3>
           <p>${esc(a.cardText)}</p>
           <button class="tr-more" type="button">Programme details <span aria-hidden="true">+</span></button>
@@ -148,7 +151,7 @@
     } catch (e) {
       /* Leave the page exactly as the HTML had it. A broken database must
          never mean a broken homepage. */
-      console.warn('[SSA] Showing the built-in activities — could not load the saved ones:', e && e.message);
+      console.warn('[SSA] Showing the built-in activities, could not load the saved ones:', e && e.message);
     }
   }
 

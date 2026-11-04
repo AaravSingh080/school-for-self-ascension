@@ -22,7 +22,7 @@
     waived: 'pill-free', refunded: 'pill-cancelled', failed: 'pill-cancelled',
     expired: 'pill-cancelled', cancelled: 'pill-cancelled'
   };
-  const STATUS_LABEL = { pending: 'Held — awaiting confirmation', confirmed: 'Confirmed', cancelled: 'Cancelled' };
+  const STATUS_LABEL = { pending: 'Held, awaiting confirmation', confirmed: 'Confirmed', cancelled: 'Cancelled' };
 
   let toastTimer;
   function toast(msg, isErr) {
@@ -97,7 +97,7 @@
         <div class="done-row"><span>Registered</span>${fmtDate(r.createdAt)}</div>
         ${st === 'claimed' ? `<p class="pay-note" style="margin-top:14px">You told us you've paid${p.utr ? ' (reference ' + esc(p.utr) + ')' : ''}.
           Manjula is checking it against her bank and will confirm your place.</p>` : ''}
-        ${st === 'paid' ? `<p class="pay-note" style="margin-top:14px">Payment received — your place is confirmed. See you there.</p>` : ''}
+        ${st === 'paid' ? `<p class="pay-note" style="margin-top:14px">Payment received. Your place is confirmed. See you there.</p>` : ''}
         <div class="done-actions" style="justify-content:flex-start;margin-top:20px">
           ${owes ? `<a class="btn btn-gold" href="register.html?a=${encodeURIComponent(r.activityId)}"><span class="roll"><span>Pay now</span><span>Pay now</span></span></a>` : ''}
           <a class="btn btn-ghost" href="${esc(waLink(`Hello Manjula, about my registration ${r.ref} for ${r.activityTitle}.`))}" target="_blank" rel="noopener">Message Manjula</a>

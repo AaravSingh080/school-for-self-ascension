@@ -74,7 +74,7 @@ window.SSA_CONFIG = {
 
     upi: {
       enabled: true,
-      vpa: '',                         // e.g. 'manjula@okhdfcbank' — blank hides UPI
+      vpa: '',                         // e.g. 'manjula@okhdfcbank'. Blank hides UPI
       payeeName: 'Manjula Singh'
     },
 
