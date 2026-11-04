@@ -671,6 +671,22 @@
         return String(s == null ? '' : s)
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      },
+
+      /* escape() is right for text but says nothing about a URL: it leaves
+         javascript:alert(1) untouched, because those characters are harmless
+         as text. Anything that ends up in an href needs this instead, which
+         permits only ordinary web links. Returns '' for anything else, so a
+         bad value yields a dead link rather than a running script. */
+      safeUrl(u) {
+        const raw = String(u == null ? '' : u).trim();
+        if (!raw) return '';
+        try {
+          const parsed = new URL(raw, location.href);
+          return (parsed.protocol === 'https:' || parsed.protocol === 'http:') ? raw : '';
+        } catch (e) {
+          return '';            /* not a URL at all */
+        }
       }
     }
   };

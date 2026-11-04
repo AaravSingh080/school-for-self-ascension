@@ -531,7 +531,7 @@
         <div class="pay-amount"><span>To pay</span><strong>${money(amount)}</strong></div>
         <p class="pay-off">Pay securely on Razorpay's own page — by card, netbanking or UPI.
         Please quote <strong class="ref-code">${esc(r.ref)}</strong> if it asks for a note.</p>
-        <a class="btn btn-gold upi-open" id="rzpGo" href="${esc(activity.payPageUrl)}" target="_blank" rel="noopener">
+        <a class="btn btn-gold upi-open" id="rzpGo" href="${esc(window.SSA.util.safeUrl(activity.payPageUrl))}" target="_blank" rel="noopener">
           <span class="roll"><span>Pay ${esc(money(amount))}</span><span>Pay ${esc(money(amount))}</span></span></a>
         <p class="pay-note">We never see or store your card details.</p></div>`;
       const go = $('rzpGo');
