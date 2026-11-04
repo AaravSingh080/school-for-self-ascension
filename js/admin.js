@@ -139,7 +139,23 @@
   function renderActivities() {
     const host = $('actList');
     if (!activities.length) {
-      host.innerHTML = `<div class="state"><h3>Nothing here yet</h3><p>Add your first activity and it will appear on the website.</p></div>`;
+      /* On a freshly connected database this is the very first screen, so give
+         her the one-press way to fill it rather than ten activities to retype. */
+      host.innerHTML = `<div class="state"><h3>Nothing here yet</h3>
+        <p>Add your first activity and it will appear on the website — or start from the ones already written for the site.</p>
+        <button class="btn btn-gold" type="button" id="seedBtn"><span class="roll"><span>Add the starting activities</span><span>Add the starting activities</span></span></button></div>`;
+      $('seedBtn').addEventListener('click', async e => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        try {
+          const n = await window.SSA.activities.importSeed();
+          toast(n ? `Added ${n} ${n === 1 ? 'activity' : 'activities'}. Edit any of them, or hide what isn't running.` : 'They were already there.');
+          load();
+        } catch (ex) {
+          btn.disabled = false;
+          toast(ex.message || 'Could not add them.', true);
+        }
+      });
       return;
     }
     const order = ['trainings', 'courses', 'journeys'];

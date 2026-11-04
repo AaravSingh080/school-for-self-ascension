@@ -27,7 +27,8 @@
     session: 'ssa.session',
     activities: 'ssa.activities',
     registrations: 'ssa.registrations',
-    seeded: 'ssa.seeded'
+    seeded: 'ssa.seeded',
+    deleted: 'ssa.deleted'
   };
 
   const TERMS_VERSION = '2026-11-01';
@@ -131,11 +132,29 @@
       return { uid: u.uid, email: u.email, name: u.name, phone: u.phone || '' };
     }
 
+    /* The seed is a starting point that can be topped up, not a one-time dump.
+       On a version bump: activities Manjula has never edited are refreshed from
+       the seed (that is how a new date or a rewritten poster reaches a browser
+       that has already been here), genuinely new ones are added, and anything
+       she has edited or deleted is left exactly as she left it. Her copy always
+       wins over ours — `updatedAt` is only ever set by saveActivity. */
     function seedIfNeeded() {
       if (readLS(LS.seeded, null) === SEED.version) return;
+      const seeds = (SEED.activities || []).map(normaliseActivity);
       const existing = readLS(LS.activities, null);
+
       if (!existing || !existing.length) {
-        writeLS(LS.activities, (SEED.activities || []).map(normaliseActivity));
+        writeLS(LS.activities, seeds);
+      } else {
+        const gone = new Set(readLS(LS.deleted, []));
+        const byId = new Map(existing.map(a => [a.id, a]));
+        seeds.forEach(seed => {
+          if (gone.has(seed.id)) return;
+          const mine = byId.get(seed.id);
+          if (!mine) { byId.set(seed.id, seed); return; }
+          if (!mine.updatedAt) byId.set(seed.id, Object.assign({}, seed, { createdAt: mine.createdAt || seed.createdAt }));
+        });
+        writeLS(LS.activities, Array.from(byId.values()));
       }
       writeLS(LS.seeded, SEED.version);
     }
@@ -203,6 +222,8 @@
 
       async removeActivity(id) {
         writeLS(LS.activities, readLS(LS.activities, []).filter(a => a.id !== id));
+        const gone = readLS(LS.deleted, []);
+        if (!gone.includes(id)) { gone.push(id); writeLS(LS.deleted, gone); }
       },
 
       /* ---- registrations ---- */
@@ -450,7 +471,19 @@
       async get(id) { return (await driver.listActivities()).find(a => a.id === id) || null; },
       async bySection(section) { return (await driver.listActivities()).filter(a => a.published && a.section === section); },
       save: a => driver.saveActivity(a),
-      remove: id => driver.removeActivity(id)
+      remove: id => driver.removeActivity(id),
+
+      /* A live Firestore starts empty, so without this the first thing Manjula
+         sees on the real site is a blank admin panel and a website with nothing
+         to register for. Adds the built-in activities to whichever store is
+         active and skips any id that is already there, so it is safe to press
+         twice. Returns how many were added. */
+      async importSeed() {
+        const have = new Set((await driver.listActivities()).map(a => a.id));
+        const fresh = (SEED.activities || []).filter(a => a && a.id && !have.has(a.id));
+        for (const a of fresh) await driver.saveActivity(a);
+        return fresh.length;
+      }
     },
 
     registrations: {
