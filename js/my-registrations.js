@@ -48,7 +48,7 @@
         <div class="demo-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
           <span><strong>The booking system is not reachable just now.</strong> Your real registrations
-          cannot be shown. Please reload in a moment, or message Manjula.</span>
+          cannot be shown. Please reload in a moment, or message us.</span>
         </div>`;
     } else if (window.SSA.isDemo) {
       $('demoBar').innerHTML = `
@@ -96,11 +96,11 @@
         <div class="done-row"><span>Payment</span><span class="pill ${PAY_PILL[st] || 'pill-unpaid'}">${esc(PAY_LABEL[st] || st)}</span></div>
         <div class="done-row"><span>Registered</span>${fmtDate(r.createdAt)}</div>
         ${st === 'claimed' ? `<p class="pay-note" style="margin-top:14px">You told us you've paid${p.utr ? ' (reference ' + esc(p.utr) + ')' : ''}.
-          Manjula is checking it against her bank and will confirm your place.</p>` : ''}
+          We are checking it against the bank and will confirm your place.</p>` : ''}
         ${st === 'paid' ? `<p class="pay-note" style="margin-top:14px">Payment received. Your place is confirmed. See you there.</p>` : ''}
         <div class="done-actions" style="justify-content:flex-start;margin-top:20px">
           ${owes ? `<a class="btn btn-gold" href="register.html?a=${encodeURIComponent(r.activityId)}"><span class="roll"><span>Pay now</span><span>Pay now</span></span></a>` : ''}
-          <a class="btn btn-ghost" href="${esc(waLink(`Hello Manjula, about my registration ${r.ref} for ${r.activityTitle}.`))}" target="_blank" rel="noopener">Message Manjula</a>
+          <a class="btn btn-ghost" href="${esc(waLink(`Hello Manjula, about my registration ${r.ref} for ${r.activityTitle}.`))}" target="_blank" rel="noopener">Message us</a>
           ${canCancel ? `<button class="mini" type="button" data-cancel="${esc(r.id)}">Cancel this registration</button>` : ''}
         </div>
       </div>`;
@@ -115,7 +115,7 @@
     const r = regs.find(x => x.id === id);
     if (!r) return;
     if (!confirm(`Cancel your registration for ${r.activityTitle}?\n\nReference ${r.ref}\n\n` +
-      `Anything owed under the refund policy will be arranged with Manjula directly.`)) return;
+      `Anything owed under the refund policy will be arranged with us directly.`)) return;
     try {
       await window.SSA.registrations.update(id, { status: 'cancelled' });
       toast('Registration cancelled.');

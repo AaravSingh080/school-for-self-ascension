@@ -59,7 +59,7 @@
         <div class="demo-bar">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
           <span><strong>The booking system is not reachable just now.</strong> Anything you fill in here
-          will not reach the school. Please reload in a moment, or message Manjula and she will register
+          will not reach the school. Please reload in a moment, or message us and we will register
           you herself.</span>
         </div>`;
     } else if (window.SSA.isDemo) {
@@ -96,7 +96,7 @@
     const all = (await window.SSA.activities.published()).filter(a => a.registrationOpen);
     if (!all.length) {
       $('chooserList').innerHTML = `<div class="state panel"><h3>Nothing open just now</h3>
-        <p>There's nothing taking registrations at the moment. Message Manjula and she'll tell you what's coming.</p>
+        <p>There's nothing taking registrations at the moment. Message us and we will tell you what is coming.</p>
         <a class="btn btn-gold" href="${esc(waLink('Hello Manjula, what workshops are coming up?'))}" target="_blank" rel="noopener"><span class="roll"><span>Ask on WhatsApp</span><span>Ask on WhatsApp</span></span></a></div>`;
       return show('chooser');
     }
@@ -140,7 +140,7 @@
       <ul class="rs-meta">
         ${meta.map(([k, v]) => `<li><span>${esc(k)}</span>${esc(v)}</li>`).join('')}
         <li><span>Fee</span>${a.price == null
-          ? 'On request, Manjula will tell you'
+          ? 'On request'
           : `<span class="rs-price">${money(a.price)}</span>`}</li>
       </ul>`;
   }
@@ -163,12 +163,12 @@
     if (!dates.length) {
       if (all.length) {
         $('fsDates').hidden = false;
-        $('datesNote').textContent = 'The last date has passed. Dates for the next one are to be decided, and Manjula will tell you as soon as they are set.';
+        $('datesNote').textContent = 'The last date has passed. Dates for the next one are to be decided, and we will let you know as soon as they are set.';
         $('dateList').innerHTML = '';
         return;
       }
       $('fsDates').hidden = false;
-      $('datesNote').textContent = 'Dates to be decided. Manjula will tell you as soon as they are set.';
+      $('datesNote').textContent = 'Dates to be decided. We will let you know as soon as they are set.';
       $('dateList').innerHTML = '';
       return;
     }
@@ -224,11 +224,11 @@
         title: free ? 'No payment needed' : (p.offline.label || 'Payment to be done after registration'),
         sub: free ? 'Just hold my place'
           : (activity.price == null
-              ? 'The fee for this one is on request. Hold your place now and Manjula will be in touch about it.'
+              ? 'The fee for this one is on request. Hold your place now and we will be in touch about it.'
               : (p.offline.note || ''))
       });
     }
-    if (!opts.length) opts.push({ id: 'offline', title: 'Payment to be done after registration', sub: 'Manjula will be in touch about the fee and how to pay.' });
+    if (!opts.length) opts.push({ id: 'offline', title: 'Payment to be done after registration', sub: 'We will be in touch about the fee and how to pay.' });
 
     /* One option is not a choice. Asking somebody to pick from a list of one
        makes them stop and wonder what the alternatives were; a plain sentence
@@ -269,7 +269,7 @@
       host.innerHTML = `<p class="pay-note">You'll be taken to Razorpay's secure page to pay by card, netbanking or UPI.
         We never see or store your card details.</p>`;
     } else {
-      host.innerHTML = `<p class="pay-note">${esc((p.offline && p.offline.note) || 'Manjula will be in touch about payment.')}</p>`;
+      host.innerHTML = `<p class="pay-note">${esc((p.offline && p.offline.note) || 'We will be in touch about payment.')}</p>`;
     }
   }
 
@@ -285,7 +285,7 @@
     document.title = `Register · ${activity.fullTitle || activity.title}`;
     $('pageTitle').innerHTML = `Register for <em>${esc(activity.title)}</em>`;
     $('pageSub').textContent = activity.registrationOpen
-      ? 'Fill this in and Manjula will confirm your place personally.'
+      ? 'Fill this in and we will confirm your place personally.'
       : 'Registration for this one is closed at the moment.';
     $('waEscape').href = waLink(`Hello Manjula, I'd like to register for ${activity.fullTitle || activity.title}.`);
 
@@ -296,7 +296,7 @@
 
     if (!activity.registrationOpen) {
       $('regForm').querySelectorAll('input, select, textarea, button').forEach(el => { el.disabled = true; });
-      $('formError').textContent = 'Registration is closed for this one just now. Message Manjula to hear when it next runs.';
+      $('formError').textContent = 'Registration is closed for this one just now. Message us to hear when it next runs.';
       $('formError').hidden = false;
     }
 
@@ -538,7 +538,7 @@
       $('formError').innerHTML = unsure
         ? 'We couldn\'t confirm your registration was saved. <strong>Please don\'t send it again</strong>. ' +
           'check <a href="my-registrations.html" style="text-decoration:underline">My registrations</a> first, ' +
-          'or message Manjula on WhatsApp.'
+          'or message us on WhatsApp.'
         : esc(ex.message || 'Something went wrong. Please try again.');
       $('formError').hidden = false;
       btn.disabled = false;
@@ -554,8 +554,8 @@
     const amount = r.payment.amountExpected;
 
     $('doneLead').textContent = amount == null
-      ? `Thank you, ${r.name.split(' ')[0]}. Manjula will be in touch about the fee and to confirm everything.`
-      : `Thank you, ${r.name.split(' ')[0]}. Your place is held while you pay. Manjula confirms every registration herself.`;
+      ? `Thank you, ${r.name.split(' ')[0]}. We will be in touch about the fee and to confirm everything.`
+      : `Thank you, ${r.name.split(' ')[0]}. Your place is held while you pay. Every registration is confirmed personally.`;
 
     $('doneCard').innerHTML = `
       <div class="done-row"><span>Reference</span><strong class="ref-code">${esc(r.ref)}</strong></div>
@@ -575,7 +575,7 @@
       $('doneTitle').textContent = 'This is a preview';
       $('doneLead').innerHTML = '<strong>Nothing has been sent.</strong> This is a demonstration of how registering will work. ' +
         'your details were saved in this browser only and the school has not received them. ' +
-        'To register for real, message Manjula.';
+        'To register for real, message us.';
     }
 
     renderDonePayment();
@@ -590,7 +590,7 @@
 
     if (amount == null || Number(amount) === 0 || r.payment.method === 'offline') {
       host.innerHTML = `<div class="panel done-card" style="margin-top:18px">
-        <p class="pay-off">${esc((p.offline && p.offline.note) || 'Manjula will be in touch about payment.')}</p></div>`;
+        <p class="pay-off">${esc((p.offline && p.offline.note) || 'We will be in touch about payment.')}</p></div>`;
       return;
     }
 
@@ -618,7 +618,7 @@
 
     host.innerHTML = `<div class="panel done-card" style="margin-top:18px">
       <div class="pay-amount"><span>To pay by UPI</span><strong>${money(amount)}</strong></div>
-      ${!vpa ? `<p class="pay-off">Manjula will send you the UPI details, as her UPI ID hasn't been added to the site yet.</p>`
+      ${!vpa ? `<p class="pay-off">We will send you the UPI details, as the UPI ID has not been added to the site yet.</p>`
       : `<div class="upi-wrap">
           <div class="upi-qr" id="qrBox"><span class="upi-qr-fallback">Preparing QR…</span></div>
           <div>
@@ -631,7 +631,7 @@
               <button class="upi-copy" type="button" id="copyVpa">Copy UPI ID</button></div>
             <a class="btn btn-gold upi-open" id="upiGo" href="${esc(link)}">
               <span class="roll"><span>Pay with a UPI app</span><span>Pay with a UPI app</span></span></a>
-            <p class="pay-note">Quote <strong class="ref-code">${esc(r.ref)}</strong> so Manjula can match your payment.
+            <p class="pay-note">Quote <strong class="ref-code">${esc(r.ref)}</strong> so we can match your payment.
             On a computer, scan the QR with your phone instead.</p>
           </div>
         </div>
@@ -640,7 +640,7 @@
             <label for="utr">Paid already? Enter your UPI reference number</label>
             <input id="utr" type="text" inputmode="numeric" placeholder="12-digit UPI / UTR number">
             <p class="f-hint">You'll find it in your UPI app's history as "UPI transaction ID" or "UTR".
-            This tells Manjula to look for your payment, and she confirms it against her bank.</p>
+            This tells us to look for your payment, and we confirm it against the bank.</p>
           </div>
           <button class="btn btn-ghost" type="button" id="claimBtn" style="margin-top:12px">I've paid</button>
           <p class="f-hint" id="claimMsg" style="margin-top:10px"></p>
@@ -671,7 +671,7 @@
       try {
         await window.SSA.registrations.claimPayment(r.id, utr);
         $('claimBtn').disabled = true;
-        $('claimMsg').innerHTML = '<strong>Thank you.</strong> Manjula will check this against her bank and confirm your place.';
+        $('claimMsg').innerHTML = '<strong>Thank you.</strong> We will check this against the bank and confirm your place.';
         toast('Noted, thank you.');
       } catch (e) { $('claimMsg').textContent = e.message; }
     });
@@ -700,8 +700,8 @@
     const t = $('notFoundTitle'), b = $('notFoundText'), wa = $('notFoundWa');
     if (t) t.textContent = 'We could not load this just now';
     if (b) b.textContent = (e && /permission|unavailable|network/i.test(e.message || ''))
-      ? 'The booking system is not reachable at the moment. Nothing has been sent. Please message Manjula and she will register you herself.'
-      : 'Something went wrong loading this page. Nothing has been sent. Please message Manjula and she will register you herself.';
+      ? 'The booking system is not reachable at the moment. Nothing has been sent. Please message us and we will register you ourselves.'
+      : 'Something went wrong loading this page. Nothing has been sent. Please message us and we will register you ourselves.';
     if (wa) { wa.href = waLink('Hello Manjula, I tried to register on the website but it would not load.'); wa.hidden = false; }
     show('notFound');
   });
