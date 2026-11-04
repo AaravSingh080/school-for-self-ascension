@@ -92,6 +92,14 @@
   /* Normalise anything the admin panel or seed hands us into one shape, so the
      renderer never has to guard against a missing field. */
   function normaliseActivity(a) {
+    /* Object.assign copies an explicit `undefined` straight over the default
+       beneath it, and Firestore rejects `undefined` outright - so an object
+       carrying `subtitle: undefined` blows up the write instead of falling
+       back to ''. Most seed activities have no subtitle, so this is reached in
+       ordinary use. Drop undefined keys first and let the defaults stand. */
+    const given = {};
+    Object.keys(a || {}).forEach(k => { if (a[k] !== undefined) given[k] = a[k]; });
+    a = given;
     const out = Object.assign({
       id: '', section: 'trainings', order: 999, published: true,
       title: '', fullTitle: '', kicker: '', image: '', imageAlt: '',
