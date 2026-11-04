@@ -257,6 +257,12 @@
            or a bad connection would lock someone out of their own account. */
         const wrongCredentials = /password|credential|user-not-found|match/i.test(ex.message || '');
         if (mode === 'signin' && wrongCredentials) noteFailure(f.email.value);
+        /* Don't leave what they typed sitting in the page - visible in plain
+           text if they had pressed Show, and still there for whoever walks up
+           next if they give up and wander off. */
+        f.password.value = '';
+        f.password.type = 'password';
+        $('authPeek').textContent = 'Show';
         const wait = mode === 'signin' ? lockedFor(f.email.value) : 0;
         setError(wait > 0
           ? 'That email and password do not match, and there have now been several attempts. Please wait ' +
@@ -273,6 +279,13 @@
 
   function close(success, user) {
     if (!dlg || !dlg.open) return;
+    /* Never leave a password behind in a closed dialog. */
+    try {
+      const pw = dlg.querySelector('[name=password]');
+      if (pw) { pw.value = ''; pw.type = 'password'; }
+      const peek = dlg.querySelector('#authPeek');
+      if (peek) peek.textContent = 'Show';
+    } catch (e) {}
     dlg.close();
     document.documentElement.classList.remove('locked');
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });

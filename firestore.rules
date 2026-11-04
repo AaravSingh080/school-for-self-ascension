@@ -68,6 +68,79 @@ service cloud.firestore {
       return s in ['paid', 'refunded', 'waived', 'failed', 'expired'];
     }
 
+    /* ---------------------------------------------------------
+       SHAPE OF A REGISTRATION
+       Without these a signed-in visitor could write any field they liked, at
+       any size. Two things go wrong in practice. One: documents grow towards
+       Firestore's 1 MiB ceiling, and since the admin panel reads the whole
+       collection, enough of them make it unopenable - and nobody can delete a
+       registration, so there is no way back. Two, and worse: `payment.history`
+       is the audit trail Manjula reads to decide whether money arrived, so a
+       registrant who can write it can plant "paid, verified by Manjula" and be
+       believed.
+
+       `size()` is NOT a string-only function in these rules - it is defined on
+       lists and maps too. So `notes.size() < 2000` on its own passes a list of
+       1999 long strings. Every size check below is paired with `is string`.
+       --------------------------------------------------------- */
+    function regFields() {
+      return ['userId', 'activityId', 'activitySection', 'activityTitle',
+              'dateId', 'dateLabel', 'mode', 'name', 'certName', 'email',
+              'phone', 'isWhatsapp', 'address', 'notes', 'termsAccepted',
+              'termsAcceptedAt', 'termsVersion', 'consentMode', 'marketingOptIn',
+              'confirmedAdult', 'enteredByAdmin', 'enteredBy', 'ref', 'currency',
+              'payment', 'status', 'createdAt', 'updatedAt'];
+    }
+    function payFields() {
+      return ['method', 'state', 'amountExpected', 'amountReceived',
+              'providerPaymentId', 'utr', 'verifiedBy', 'verifiedAt',
+              'notes', 'history'];
+    }
+    function addrFields() {
+      return ['line1', 'line2', 'city', 'state', 'pin', 'country'];
+    }
+
+    function shortText(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    /* Every free-text field a person can type, bounded. The numbers are
+       generous for real answers and useless for filling a database. */
+    function regTextIsSane(d) {
+      return shortText(d.name, 120)
+        && shortText(d.certName, 120)
+        && shortText(d.email, 200)
+        && shortText(d.phone, 30)
+        && shortText(d.notes, 2000)
+        && shortText(d.activityId, 120)
+        && shortText(d.activityTitle, 200)
+        && shortText(d.activitySection, 40)
+        && shortText(d.dateId, 60)
+        && shortText(d.dateLabel, 120)
+        && shortText(d.mode, 40)
+        && shortText(d.ref, 40)
+        && shortText(d.currency, 8)
+        && shortText(d.status, 20)
+        && shortText(d.termsVersion, 40)
+        && shortText(d.consentMode, 20)
+        && shortText(d.enteredBy, 200)
+        && d.address.keys().hasOnly(addrFields())
+        && shortText(d.address.line1, 200)
+        && shortText(d.address.line2, 200)
+        && shortText(d.address.city, 100)
+        && shortText(d.address.state, 100)
+        && shortText(d.address.pin, 20)
+        && shortText(d.address.country, 100)
+        && d.payment.keys().hasOnly(payFields())
+        && shortText(d.payment.method, 40)
+        && shortText(d.payment.state, 20)
+        && shortText(d.payment.utr, 60)
+        && shortText(d.payment.verifiedBy, 200)
+        && shortText(d.payment.notes, 500)
+        && shortText(d.payment.providerPaymentId, 120)
+        && d.keys().hasOnly(regFields());
+    }
+
     /* =====================================================
        activities — the workshops shown on the website
        Anyone may read (the public site lists them).
@@ -85,7 +158,10 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
       allow create, update: if isOwner(uid)
-        && incoming().keys().hasOnly(['name', 'email', 'phone', 'createdAt']);
+        && incoming().keys().hasOnly(['name', 'email', 'phone', 'createdAt'])
+        && shortText(incoming().name, 120)
+        && shortText(incoming().email, 200)
+        && shortText(incoming().phone, 30);
       allow delete: if isOwner(uid) || isAdmin();
     }
 
@@ -110,7 +186,8 @@ service cloud.firestore {
         && incoming().payment.state == 'unpaid'
         && incoming().status == 'pending'
         && incoming().payment.amountReceived == null
-        && incoming().payment.verifiedBy == '';
+        && incoming().payment.verifiedBy == ''
+        && regTextIsSane(incoming());
 
       /* CREATE: a signed-in person registering themselves. */
       allow create: if isSignedIn()
@@ -133,11 +210,19 @@ service cloud.firestore {
         /* and may not dress their own registration up as one Manjula entered */
         && incoming().enteredByAdmin == false
         && incoming().enteredBy == ''
-        /* keep the fields sane */
-        && incoming().name is string && incoming().name.size() > 0 && incoming().name.size() < 120
-        && incoming().email is string && incoming().email.size() < 200
-        && incoming().phone is string && incoming().phone.size() < 30
-        && incoming().notes.size() < 2000;
+        /* 'ticked' is what actually happened here: they ticked the box. Only
+           Manjula may record 'verbal', because only she can have heard it. */
+        && incoming().consentMode == 'ticked'
+        /* The audit trail starts empty of claims. Without this a registration
+           can be born carrying a forged "paid" entry. */
+        && incoming().payment.history.size() == 1
+        && incoming().payment.history[0].state == 'unpaid'
+        && incoming().payment.utr == ''
+        && incoming().payment.notes == ''
+        && incoming().payment.verifiedAt == ''
+        /* every field named, typed and bounded */
+        && incoming().name.size() > 0
+        && regTextIsSane(incoming());
 
       /* UPDATE by the person who registered.
          They may do exactly two things: say they have started paying, say they
@@ -176,16 +261,34 @@ service cloud.firestore {
         && incoming().enteredBy == existing().enteredBy
         && incoming().activityTitle == existing().activityTitle
         && incoming().createdAt == existing().createdAt
-        && incoming().payment.utr.size() < 60;
+        /* The audit trail, the school's own notes, and the payment-provider id
+           are Manjula's record of what happened, not the registrant's. Leaving
+           history writable let a registrant plant an entry reading
+           "paid - by archangelg9@gmail.com", which is exactly what she reads
+           when deciding whether the money arrived. */
+        && incoming().payment.history == existing().payment.history
+        && incoming().payment.notes == existing().payment.notes
+        && incoming().payment.providerPaymentId == existing().payment.providerPaymentId
+        && incoming().payment.method == existing().payment.method
+        /* and the record cannot be grown or reshaped on the way through */
+        && regTextIsSane(incoming());
 
       /* UPDATE by Manjula — she is the one who reconciles money, so she may
          write the states nobody else can. */
       allow update: if isAdmin();
 
-      /* Nobody deletes a registration, not even Manjula: a deleted record is a
-         person who paid and has no proof. Cancel it instead — that keeps the
-         history. Remove this line only if you really mean it. */
-      allow delete: if false;
+      /* A registration that money has touched is evidence, and deleting it
+         would leave a person who paid with no proof. Those can only ever be
+         cancelled, which keeps the history.
+
+         Everything else - a never-paid record, which is what spam and mistakes
+         look like - Manjula may remove. Without this there is no way to clear
+         junk out of a collection the admin panel reads in full, and a flood
+         would be permanent. */
+      allow delete: if isAdmin()
+        && existing().payment.state == 'unpaid'
+        && existing().payment.amountReceived == null
+        && existing().payment.verifiedBy == '';
     }
 
     /* Anything not named above is closed. */

@@ -262,6 +262,17 @@
   const draftKey = () => 'ssa.draft.' + (activity ? activity.id : 'none');
   const FIELDS = ['name', 'certName', 'phone', 'email', 'line1', 'line2', 'city', 'state', 'pin', 'country', 'notes'];
 
+  /* A draft holds somebody's name, phone and home address. On a shared laptop
+     - a family computer, a library, a friend's phone - the next person to open
+     this page would otherwise find it all filled in for them. So a draft is
+     stamped with who wrote it and when, and is only ever given back to the same
+     person, within a day. */
+  const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+  const whoAmI = () => {
+    const u = window.SSA.auth.user();
+    return u ? u.uid : 'anon';
+  };
+
   function saveDraft() {
     if (!activity) return;
     try {
@@ -271,6 +282,8 @@
       d.isWhatsapp = f.isWhatsapp.checked;
       d.dateId = selectedDate ? selectedDate.id : '';
       d.payMethod = chosenMethod;
+      d.owner = whoAmI();
+      d.savedAt = Date.now();
       localStorage.setItem(draftKey(), JSON.stringify(d));
     } catch (e) { /* private browsing — not worth bothering anyone about */ }
   }
@@ -281,6 +294,12 @@
     const f = $('regForm').elements;
     let draft = {};
     try { draft = JSON.parse(localStorage.getItem(draftKey()) || '{}'); } catch (e) {}
+
+    /* Not mine, or too old to be mine: forget it rather than hand someone
+       else's address to whoever is sitting here now. */
+    const mine = draft.owner === whoAmI();
+    const fresh = draft.savedAt && (Date.now() - draft.savedAt) < DRAFT_TTL_MS;
+    if (!mine || !fresh) { clearDraft(); draft = {}; }
 
     FIELDS.forEach(k => { if (f[k] && draft[k]) f[k].value = draft[k]; });
     if (draft.isWhatsapp === false) f.isWhatsapp.checked = false;
