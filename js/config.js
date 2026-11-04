@@ -13,7 +13,7 @@ window.SSA_CONFIG = {
                   Perfect for showing the client. NOT a live system.
      'firebase' — real logins and a shared database. Fill in `firebase` below.
      --------------------------------------------------------- */
-  mode: 'demo',
+  mode: 'firebase',
 
   /* Paste the firebaseConfig block from the Firebase console here, then
      change mode above to 'firebase'. These values are public by design —
