@@ -397,10 +397,14 @@
      ========================================================= */
   const digits = s => String(s || '').replace(/\D/g, '');
 
-  function phoneProblem(value, country) {
+  /* The dial code the person actually picked is a far better signal than the
+     country typed into their address, so it decides when it is present. */
+  function phoneProblem(value, country, dialCode) {
     const d = digits(value);
     if (!d) return 'Please add a phone number.';
-    const indian = !country || /^(india|bharat|in)$/i.test(country.trim());
+    const indian = dialCode
+      ? dialCode === '+91'
+      : (!country || /^(india|bharat|in)$/i.test(country.trim()));
     if (indian) {
       /* Indian mobiles are 10 digits starting 6–9, optionally with 91 or 0. */
       let core = d;
