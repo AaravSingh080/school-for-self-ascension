@@ -40,6 +40,11 @@ What protects the data is step 4.
 Open the live site, click **Sign in → Create an account**, and sign up with the
 address in `admins` in `js/config.js` (currently `archangelg9@gmail.com`).
 
+Then open **`admin.html`** (or **School sign-in** at the bottom of the website).
+A brand-new database is empty, so the activities tab will offer
+**“Add the starting activities”** — press it once and the ten activities already
+written for the site are put in, ready to edit. It is safe to press twice.
+
 ### 4. Lock the database — do not skip this
 1. In Firebase: **Authentication → Users**, copy the **User UID** for that account.
 2. Open `firestore.rules`, replace `REPLACE_WITH_MANJULA_UID` with that UID.
@@ -77,6 +82,28 @@ Razorpay dashboard and paste its URL into the activity's `payPageUrl`, and set
 **Do not** integrate Razorpay Standard Checkout from this site. It requires an
 `order_id` that can only be created with the secret key, and Razorpay's docs state
 that payments made without one are automatically refunded — the money would be lost.
+
+---
+
+## Changing an activity later
+
+Two ways, and they do different things.
+
+**In the admin panel** — the normal way. Whatever you change there is yours and
+the site will never overwrite it.
+
+**In `js/seed-content.js`** — for the built-in copy, e.g. next year's dates.
+Edit the activity *and* raise `version:` at the top of the file by one. On the
+next visit each browser will:
+
+- refresh activities **nobody has edited in the admin panel** — this is how new
+  dates reach someone who has been to the site before;
+- add activities that are genuinely new;
+- leave anything edited in the admin panel exactly as it is;
+- keep anything deleted deleted.
+
+If you forget to raise `version:`, nothing happens — that is the usual reason a
+change “doesn't show up”.
 
 ---
 
