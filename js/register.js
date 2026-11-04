@@ -140,8 +140,13 @@
 
   function renderDates() {
     const dates = activity.dates || [];
+    /* No dates yet is the normal state for most of these, so say so rather
+       than hiding the question. Someone registering for a workshop with no
+       date still needs to know that is deliberate and not a broken page. */
     if (!dates.length) {
-      $('fsDates').hidden = true;
+      $('fsDates').hidden = false;
+      $('datesNote').textContent = 'Dates to be decided. Manjula will tell you as soon as they are set.';
+      $('dateList').innerHTML = '';
       return;
     }
     $('fsDates').hidden = false;
@@ -191,7 +196,19 @@
       opts.push({ id: 'offline', title: free ? 'No payment needed' : (p.offline.label || 'Arrange with Manjula'),
         sub: free ? 'Just hold my place' : (p.offline.note || '') });
     }
-    if (!opts.length) opts.push({ id: 'offline', title: 'Arrange with Manjula', sub: 'She will be in touch about payment' });
+    if (!opts.length) opts.push({ id: 'offline', title: 'Payment to be done after registration', sub: 'Manjula will be in touch about the fee and how to pay.' });
+
+    /* One option is not a choice. Asking somebody to pick from a list of one
+       makes them stop and wonder what the alternatives were; a plain sentence
+       tells them what happens next and lets them carry on. */
+    if (opts.length === 1) {
+      const only = opts[0];
+      chosenMethod = only.id;
+      $('payMethods').innerHTML = `
+        <p class="pay-only"><strong>${esc(only.title)}</strong>${only.sub ? `<br><span>${esc(only.sub)}</span>` : ''}</p>`;
+      renderPayDetail();
+      return;
+    }
 
     $('payMethods').innerHTML = opts.map((o, i) => `
       <label class="pick-opt">

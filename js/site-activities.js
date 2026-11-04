@@ -50,11 +50,14 @@
       ${a.listTitle ? `<p class="dlg-list-title">${esc(a.listTitle)}</p>` : ''}
       ${(a.list || []).length ? `<ul class="dlg-list">${a.list.map(li => `<li>${esc(li)}</li>`).join('')}</ul>` : ''}
       ${a.note ? `<p class="dlg-note">${esc(a.note)}</p>` : ''}
-      ${a.price != null || (a.dates || []).length ? `<p class="dlg-list-title" style="margin-top:24px">Dates &amp; fee</p>
-        <ul class="dlg-list">
-          ${(a.dates || []).map(d => `<li>${esc(d.label)}${d.mode ? ' · ' + esc(MODE_LABEL[d.mode] || d.mode) : ''}</li>`).join('')}
-          ${a.price != null ? `<li>${esc(money(a.price))}</li>` : ''}
-        </ul>` : ''}`;
+      <p class="dlg-list-title" style="margin-top:24px">Dates &amp; fee</p>
+      <ul class="dlg-list">
+        ${(a.dates || []).length
+          ? (a.dates || []).map(d => `<li>${esc(d.label)}${d.mode ? ' · ' + esc(MODE_LABEL[d.mode] || d.mode) : ''}</li>`).join('')
+          : '<li>Dates to be decided</li>'}
+        <li>${a.price != null ? esc(money(a.price)) : 'Fee on request'}</li>
+        <li>Payment to be done after registration</li>
+      </ul>`;
 
     return `
       <article class="tr-card" data-title="${esc(a.fullTitle || a.title)}" data-id="${esc(a.id)}">
@@ -81,7 +84,7 @@
         </div>
         <div class="jr-text reveal">
           <p class="jr-when">
-            ${when && when.label ? `<span>${esc(when.label)}</span>` : ''}
+            <span>${when && when.label ? esc(when.label) : 'Dates to be decided'}</span>
             ${a.duration ? `<span>${esc(a.duration)}</span>` : (a.location ? `<span>${esc(a.location)}</span>` : '')}
           </p>
           <h3>${esc(a.title)}</h3>

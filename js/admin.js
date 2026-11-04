@@ -226,7 +226,7 @@
                 ${a.registrationOpen ? '' : '<span class="pill pill-unpaid">Registration closed</span>'}
                 <span>${a.price == null ? 'Price on request' : money(a.price)}</span>
                 <span>·</span>
-                <span>${dates ? dates + (dates === 1 ? ' date' : ' dates') : 'No dates yet'}</span>
+                <span>${dates ? dates + (dates === 1 ? ' date' : ' dates') : 'Dates to be decided'}</span>
                 <span>·</span>
                 <span>${regs} registered</span>
               </div>

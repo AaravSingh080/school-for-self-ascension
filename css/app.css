@@ -396,3 +396,16 @@ table.adm .who span { color: var(--muted); font-size: 12.5px; }
   .spinner { animation: none; }
   .toast { transition: opacity .01ms; }
 }
+
+/* The payment section when only one way to pay is offered: a sentence, not a
+   list of one. */
+.pay-only {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(75, 36, 89, .05);
+  border: 1px solid rgba(75, 36, 89, .12);
+  line-height: 1.55;
+}
+.pay-only strong { font-weight: 600; }
+.pay-only span { color: var(--muted); font-size: 14.5px; }
