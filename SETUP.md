@@ -16,45 +16,75 @@ the form, see "your place is held", and nobody would ever hear about it.
 
 ---
 
-## Going live — about 15 minutes
+## Going live — about 20 minutes
+
+**Do these in order.** The order matters: a Production-mode database refuses
+every read and write until the rules are published, so the rules have to go up
+before anything tries to use the database.
 
 ### 1. Create the Firebase project
 1. Go to <https://console.firebase.google.com> and click **Add project**.
 2. Name it `school-for-self-ascension`. Google Analytics can be **off**.
-3. **Build → Authentication → Get started → Email/Password → Enable → Save**.
-4. **Build → Firestore Database → Create database → Production mode**.
-   Location **asia-south1 (Mumbai)**. ⚠️ *This can never be changed later.*
-5. **Project settings** (gear icon) → **Your apps** → the **`</>`** web icon →
+3. Find **Authentication** (use the console's search box) → **Get started** →
+   **Sign-in method** → **Email/Password** → **Enable** → **Save**.
+4. Find **Firestore Database** → **Create database** → **Firestore in Native
+   mode** → **Production mode**, location **asia-south1 (Mumbai)**.
+   ⚠️ *The location can never be changed later.*
+5. **Project settings** (gear) → **Your apps** → the **`</>`** web icon →
    nickname `website` → **Register app**.
 6. Copy the `firebaseConfig = { ... }` block it shows you.
 
-### 2. Put the config in the site
+### 2. Create Manjula's account — in the console, not on the website
+**Authentication → Users → Add user.** Enter the address in `admins` in
+`js/config.js` (currently `archangelg9@gmail.com`) and a password.
+
+Then copy the **User UID** from that row. It looks like `K2mWq9xYzAbCdEfGhIj…`
+
+> Why here and not on the website: in Production mode the database refuses
+> everything until step 3. Signing up on the site would create the account but
+> fail to save the profile, and the screen would say "you don't have permission"
+> about an account that now exists — leaving you unable to sign up again and no
+> wiser as to why.
+
+### 3. Lock the database — do not skip this
+1. Open `firestore.rules` and replace `REPLACE_WITH_MANJULA_UID` with the UID
+   from step 2.
+2. In Firebase: **Firestore Database → Rules**, paste the whole file, **Publish**.
+
+In Production mode **nothing can be read or written until these rules are
+published** — which is why they go up before the site is pointed at the
+database. Every line of JavaScript on the site is public and editable by any
+visitor, so these rules are the only real protection; the `admins` list in
+`js/config.js` only decides what the screen shows.
+
+### 4. Point the site at the database
 Open `js/config.js` and:
 - paste the values into the `firebase: { ... }` block;
 - change `mode: 'demo'` to `mode: 'firebase'`.
 
 These values are *meant* to be public — they're an address, not a password.
-What protects the data is step 4.
+What protects the data is step 3.
 
-### 3. Create Manjula's account
-Open the live site, click **Sign in → Create an account**, and sign up with the
-address in `admins` in `js/config.js` (currently `archangelg9@gmail.com`).
+Remember to bump the `?v=` number on `js/config.js` in every HTML file, or
+browsers will keep the old one.
 
-Then open **`admin.html`** (or **School sign-in** at the bottom of the website).
-A brand-new database is empty, so the activities tab will offer
+### 5. Authorise the web address
+**Authentication → Settings → Authorised domains.** `localhost` and
+`<project>.firebaseapp.com` are there already; add the address the site is
+actually served from — `aaravsingh080.github.io`, and your custom domain when
+you have one. Sign-in fails on any domain not in this list.
+
+### 6. Fill the database
+Open **`admin.html`** (or **School sign-in** at the bottom of the website) and
+sign in as Manjula. A brand-new database is empty, so the activities tab offers
 **“Add the starting activities”** — press it once and the ten activities already
-written for the site are put in, ready to edit. It is safe to press twice.
+written for the site go in, ready to edit. It is safe to press twice.
 
-### 4. Lock the database — do not skip this
-1. In Firebase: **Authentication → Users**, copy the **User UID** for that account.
-2. Open `firestore.rules`, replace `REPLACE_WITH_MANJULA_UID` with that UID.
-3. In Firebase: **Firestore Database → Rules**, paste the whole file, **Publish**.
+If instead you see **“The database refused this account”**, the panel tells you
+which of the two causes it is and shows the account's UID so you can compare it
+with `adminUid()` in `firestore.rules`.
 
-Until this is done the database is open. Every line of JavaScript on the site is
-public and editable by any visitor, so these rules are the only real protection —
-the `admins` list in `js/config.js` just decides what the screen shows.
-
-### 5. Add the UPI ID
+### 7. Add the UPI ID
 In `js/config.js`, set `payments.upi.vpa` to Manjula's UPI ID
 (e.g. `manjula@okhdfcbank`). Leave it blank and the UPI option is hidden.
 

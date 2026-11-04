@@ -107,17 +107,57 @@
     if (user && admin) load();
   }
 
+  /* Load the two collections independently. Awaiting them in sequence inside
+     one try meant a denied registrations read also threw away the activities
+     that had loaded fine - leaving a blank panel, and hiding the very button
+     that seeds an empty database. The usual cause is the rules not being
+     published, or adminUid() not matching this account, so say so plainly and
+     leave it on screen; a toast disappears after three seconds. */
   async function load() {
-    try {
-      activities = await window.SSA.activities.list();
-      registrations = await window.SSA.registrations.all();
-      renderActivities();
-      renderRegs();
-      const waiting = registrations.filter(r => ['claimed', 'initiated'].includes(r.payment && r.payment.state)).length;
-      $('regCount').textContent = waiting ? `(${waiting} to check)` : (registrations.length ? `(${registrations.length})` : '');
-    } catch (e) {
-      toast(e.message || 'Could not load the data.', true);
+    const [actRes, regRes] = await Promise.allSettled([
+      window.SSA.activities.list(),
+      window.SSA.registrations.all()
+    ]);
+
+    activities = actRes.status === 'fulfilled' ? actRes.value : [];
+    registrations = regRes.status === 'fulfilled' ? regRes.value : [];
+    renderActivities();
+    renderRegs();
+
+    const waiting = registrations.filter(r => ['claimed', 'initiated'].includes(r.payment && r.payment.state)).length;
+    $('regCount').textContent = waiting ? `(${waiting} to check)` : (registrations.length ? `(${registrations.length})` : '');
+
+    const denied = [actRes, regRes].filter(x => x.status === 'rejected');
+    renderLoadProblem(denied.map(x => x.reason));
+  }
+
+  function renderLoadProblem(errors) {
+    const host = $('loadProblem');
+    if (!host) return;
+    if (!errors.length) { host.innerHTML = ''; host.hidden = true; return; }
+
+    const permission = errors.some(e => /permission|insufficient/i.test((e && e.message) || ''));
+    const user = window.SSA.auth.user();
+    const uid = user && user.uid ? user.uid : '(not signed in)';
+
+    host.hidden = false;
+    host.innerHTML = loadProblemMarkup(permission, uid, errors);
+  }
+
+  /* Split out so the long explanation stays readable. */
+  function loadProblemMarkup(isPermission, uid, errors) {
+    if (!isPermission) {
+      return `<div class="demo-bar"><span><strong>Could not load everything.</strong>
+        ${esc((errors[0] && errors[0].message) || 'The database did not answer.')}
+        Check the connection and reload.</span></div>`;
     }
+    return `<div class="demo-bar"><span><strong>The database refused this account.</strong>
+      That is almost always one of two things.
+      <strong>1.</strong> The security rules have not been published yet — open
+      <code>firestore.rules</code>, paste it into Firebase → Firestore Database → Rules, and press Publish.
+      <strong>2.</strong> The <code>adminUid()</code> line in those rules does not match this account.
+      This account's ID is <code>${esc(uid)}</code> — it has to be exactly what
+      <code>adminUid()</code> returns. Compare it with Firebase → Authentication → Users.</span></div>`;
   }
 
   /* =========================================================
@@ -468,8 +508,15 @@
     const def = r.payment && r.payment.amountExpected != null ? r.payment.amountExpected : '';
     const v = prompt(`How much did ${r.name} pay in cash? (in ₹)`, def);
     if (v === null) return;
+    /* People type "15,000" or "₹15000". Number() turns both into NaN, which
+       Firestore stores happily and no screen here can then correct. */
+    const cleaned = String(v).replace(/[₹,\s]/g, '');
+    const amount = cleaned === '' ? null : Number(cleaned);
+    if (amount !== null && (!isFinite(amount) || amount < 0)) {
+      return toast('Please enter just the number, for example 15000.', true);
+    }
     try {
-      await window.SSA.registrations.recordCash(id, v === '' ? null : Number(v));
+      await window.SSA.registrations.recordCash(id, amount);
       toast('Cash payment recorded.');
       load();
     } catch (e) { toast(e.message, true); }

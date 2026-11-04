@@ -277,7 +277,15 @@
         'auth/too-many-requests': 'Too many attempts. Please wait a minute and try again.',
         'auth/network-request-failed': 'Couldn\'t reach the server. Please check your connection.',
         'permission-denied': 'You don\'t have permission to do that.',
-        'unavailable': 'Couldn\'t reach the database. Please check your connection and try again.'
+        'unavailable': 'Couldn\'t reach the database. Please check your connection and try again.',
+        /* What a half-finished Firebase project actually produces. Without
+           these the raw SDK string reaches the visitor. */
+        'auth/operation-not-allowed': 'Email sign-in is not switched on for this site yet. Please message Manjula.',
+        'auth/unauthorized-domain': 'This web address is not authorised for sign-in yet. Please message Manjula.',
+        'auth/invalid-api-key': 'This site has not finished connecting to its database. Please message Manjula.',
+        'failed-precondition': 'The database is not ready yet. Please message Manjula.',
+        'not-found': 'That record no longer exists.',
+        'resource-exhausted': 'The site is busy just now. Please try again in a few minutes.'
       };
       return new Error(map[code] || (e && e.message) || 'Something went wrong. Please try again.');
     }
