@@ -23,11 +23,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* ----- who is who ----- */
-    /* Until this is replaced with a real UID, nobody is an admin: the string
-       below can never equal a real request.auth.uid. The admin panel will say
-       so on screen rather than simply appearing broken. */
+    /* Manjula's account. This single line is what separates "the school" from
+       "anyone who signed up". If her account is ever recreated, the UID changes
+       and this must change with it, or she loses the admin panel. */
     function adminUid() {
-      return 'REPLACE_WITH_MANJULA_UID';
+      return 'kjk5DnNwkDctb7nlJe6Qn7rslGg2';
     }
     function isSignedIn() {
       return request.auth != null;
