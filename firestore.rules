@@ -261,12 +261,29 @@ service cloud.firestore {
         && incoming().enteredBy == existing().enteredBy
         && incoming().activityTitle == existing().activityTitle
         && incoming().createdAt == existing().createdAt
-        /* The audit trail, the school's own notes, and the payment-provider id
-           are Manjula's record of what happened, not the registrant's. Leaving
-           history writable let a registrant plant an entry reading
-           "paid - by archangelg9@gmail.com", which is exactly what she reads
-           when deciding whether the money arrived. */
-        && incoming().payment.history == existing().payment.history
+        /* The audit trail is Manjula's record of what happened, so a registrant
+           must not be able to plant an entry reading "paid, by
+           archangelg9@gmail.com" - which is exactly what she reads when
+           deciding whether money arrived.
+
+           But it cannot simply be frozen either. Saying "I have paid" is the
+           one thing a visitor is supposed to do here, and setPaymentState
+           appends an entry every time, so freezing it refused the UPI claim
+           outright: the person who had just sent money was told they did not
+           have permission.
+
+           So: append-only, one entry at a time, everything before it
+           untouched, and the new entry must say by:'visitor' and must match
+           the state being set - which visitorPayState already limits to the
+           four a visitor may write. The length cap matters because nothing
+           paid can be deleted, so an unbounded history is a way to grow a
+           document towards the 1 MiB ceiling by claiming and cancelling. */
+        && (incoming().payment.history == existing().payment.history
+            || (incoming().payment.history.size() == existing().payment.history.size() + 1
+                && incoming().payment.history.size() <= 40
+                && incoming().payment.history[0:existing().payment.history.size()] == existing().payment.history
+                && incoming().payment.history[existing().payment.history.size()].by == 'visitor'
+                && incoming().payment.history[existing().payment.history.size()].state == incoming().payment.state))
         && incoming().payment.notes == existing().payment.notes
         && incoming().payment.providerPaymentId == existing().payment.providerPaymentId
         && incoming().payment.method == existing().payment.method

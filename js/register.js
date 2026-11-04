@@ -78,7 +78,14 @@
     if (!id) return renderChooser();
 
     activity = await window.SSA.activities.get(id);
-    if (!activity || !activity.published) return show('notFound');
+    if (!activity || !activity.published) {
+      /* The WhatsApp escape on this panel was only wired up in the error path,
+         so on the ordinary "we couldn't find that one" it sat there as a dead
+         button pointing at '#'. */
+      const wa = $('notFoundWa');
+      if (wa) { wa.href = waLink('Hello Manjula, I was looking at a workshop on the website but the page says it is not there.'); wa.hidden = false; }
+      return show('notFound');
+    }
     renderForm();
   }
 
@@ -139,11 +146,27 @@
   }
 
   function renderDates() {
-    const dates = activity.dates || [];
-    /* No dates yet is the normal state for most of these, so say so rather
-       than hiding the question. Someone registering for a workshop with no
-       date still needs to know that is deliberate and not a broken page. */
+    const all = activity.dates || [];
+    /* `today` from a local date, not toISOString(): that is UTC, so between
+       midnight and 05:30 in India it would still be yesterday and a date that
+       has just passed would stay selectable. */
+    const now = new Date();
+    const todayLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+    /* If every date has already been and gone, this is the same situation as
+       having none: the next one has not been set. Treating it as "pick a date"
+       left the only option greyed out, so "Hold my place" refused to submit and
+       pointed at a date nobody could choose. The Egypt journey has been in
+       exactly that state. */
+    const upcoming = all.filter(d => !(d.start && d.start < todayLocal));
+    const dates = upcoming;
     if (!dates.length) {
+      if (all.length) {
+        $('fsDates').hidden = false;
+        $('datesNote').textContent = 'The last date has passed. Dates for the next one are to be decided, and Manjula will tell you as soon as they are set.';
+        $('dateList').innerHTML = '';
+        return;
+      }
       $('fsDates').hidden = false;
       $('datesNote').textContent = 'Dates to be decided. Manjula will tell you as soon as they are set.';
       $('dateList').innerHTML = '';
@@ -154,9 +177,8 @@
       ? 'This one runs on:'
       : 'Which would suit you?';
 
-    const today = new Date().toISOString().slice(0, 10);
     $('dateList').innerHTML = dates.map((d, i) => {
-      const past = d.start && d.start < today;
+      const past = d.start && d.start < todayLocal;
       const modeLabel = d.mode === 'online' ? 'Online' : d.mode === 'in-person' ? 'In person' : '';
       return `
         <label class="pick-opt${past ? ' is-full' : ''}">
