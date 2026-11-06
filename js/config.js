@@ -44,7 +44,10 @@ window.SSA_CONFIG = {
      The real lock is in the Firestore security rules — a visitor who edits
      this file in their own browser still cannot write anything.
      --------------------------------------------------------- */
-  admins: ['archangelg9@gmail.com'],
+  admins: [
+    'archangelg9@gmail.com',    /* Manjula */
+    'aaravsingh@gmail.com'      /* site maintainer */
+  ],
 
   /* ---------------------------------------------------------
      3. THE SCHOOL
