@@ -10,31 +10,44 @@ rules_version = '2';
    their own browser, so nothing in js/ can be trusted to enforce anything.
    These rules run on Google's servers, where a visitor cannot reach them.
 
-   adminUid() below is already set to Manjula's account. If her account is ever
-   deleted and recreated, the UID changes: copy the new one from Firebase
-   console → Authentication → Users → the "User UID" column, put it here, and
-   publish again.
+   adminUids() below lists the accounts that run the school's side of the site.
+   To add somebody, copy their User UID from Firebase console → Authentication
+   → Users → the "User UID" column, add it to that list, and publish again.
+   Also add their email to `admins` in js/config.js, which is what decides
+   whether the admin link is shown to them at all.
 
    Why a UID and not the email: an email can be changed by the account holder
    in some flows, and `admins` in js/config.js only decides what the screen
-   shows. The UID here is the real lock.
+   shows. The UIDs here are the real lock.
    ========================================================= */
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /* ----- who is who ----- */
-    /* Manjula's account. This single line is what separates "the school" from
-       "anyone who signed up". If her account is ever recreated, the UID changes
-       and this must change with it, or she loses the admin panel. */
-    function adminUid() {
-      return 'kjk5DnNwkDctb7nlJe6Qn7rslGg2';
+    /* Who counts as "the school", as opposed to anyone who signed up.
+
+       A short list rather than one line, so Manjula and whoever maintains the
+       site each use their own account. A shared login is worse than two
+       entries here: nobody can tell who changed what, and the password has to
+       travel between people to be useful.
+
+       Add or remove by UID, from Firebase console -> Authentication -> Users
+       -> the "User UID" column. A UID is not a secret and not a credential;
+       being listed here grants nothing without that account's password.
+       If an account is deleted and remade its UID changes, and this must
+       change with it or that person silently loses the admin panel. */
+    function adminUids() {
+      return [
+        'kjk5DnNwkDctb7nlJe6Qn7rslGg2',   /* archangelg9@gmail.com  - Manjula */
+        'N6l6L9nLtac8h620q3G0xzPDOVW2'    /* aaravsingh@gmail.com   - site maintainer */
+      ];
     }
     function isSignedIn() {
       return request.auth != null;
     }
     function isAdmin() {
-      return isSignedIn() && request.auth.uid == adminUid();
+      return isSignedIn() && request.auth.uid in adminUids();
     }
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
