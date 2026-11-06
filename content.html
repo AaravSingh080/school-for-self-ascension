@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website content · School for Self Ascension</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#4B2459">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1.5 36 10.75v18.5L20 38.5 4 29.25v-18.5Z' fill='%234B2459'/%3E%3Cpath d='M20 11c2.4 3.3 3.6 6.3 3.6 9.1S22.4 25.5 20 28c-2.4-2.5-3.6-5.1-3.6-7.9S17.6 14.3 20 11Z' fill='%23E9D3AE'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/app.css?v=7">
+</head>
+<body class="app">
+
+  <header class="app-hdr">
+    <a class="brand" href="index.html" aria-label="School for Self Ascension home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z"/>
+        <path d="M20 11.5c2.3 3.2 3.4 6.1 3.4 8.8S22.3 25.5 20 28c-2.3-2.5-3.4-5-3.4-7.7S17.7 14.7 20 11.5Z"/>
+        <path d="M20 28c-4.3-.4-7.3-2.4-8.6-6.3 2.9-.4 5.4.3 7.6 2M20 28c4.3-.4 7.3-2.4 8.6-6.3-2.9-.4-5.4.3-7.6 2"/>
+      </svg>
+      <span class="brand-text"><small>School for</small>Self Ascension</span>
+    </a>
+    <div class="app-hdr-right">
+      <a class="app-back" href="index.html">← Back to the website</a>
+      <div id="acctHost"></div>
+    </div>
+  </header>
+
+  <div id="demoBar"></div>
+  <div id="loadProblem" hidden></div>
+
+  <main class="app-main">
+
+    <div class="state" id="booting">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>One moment…</p>
+    </div>
+
+    <div class="panel state" id="gateSignIn" hidden>
+      <h3>Please sign in</h3>
+      <p>This page is for the school.</p>
+      <button class="btn btn-gold" type="button" id="gateSignInBtn"><span class="roll"><span>Sign in</span><span>Sign in</span></span></button>
+    </div>
+
+    <div class="panel state" id="gateDenied" hidden>
+      <h3>Not this account</h3>
+      <p id="gateDeniedWho">You're signed in, but this account doesn't have access.</p>
+      <a class="btn btn-ghost" href="index.html">Back to the website</a>
+    </div>
+
+    <div id="contentApp" hidden>
+      <div class="app-head">
+        <h1>Website <em>content</em></h1>
+        <p>The words and pictures on the front page. Workshops and registrations are in the <a href="admin.html">admin panel</a>.</p>
+      </div>
+
+      <div class="cm-help panel">
+        <p><strong>Leave a box empty and the website keeps what it already says.</strong>
+        Nothing here can leave a blank space on the page, so it is safe to try something
+        and change your mind. Every box shows the current wording in grey until you type.</p>
+      </div>
+
+      <!-- ============ Front page ============ -->
+      <section class="panel cm-sec" data-sec="hero">
+        <div class="panel-head">
+          <h2>The opening line</h2>
+          <button class="mini" type="button" data-reset="hero">Put the original back</button>
+        </div>
+        <p class="panel-note">The sentence under “Come home to yourself”. The big headline itself
+        is part of the scroll animation and is not editable here.</p>
+        <div class="f-row">
+          <label for="cHeroSub">Opening sentence</label>
+          <textarea id="cHeroSub" rows="2" maxlength="400"></textarea>
+        </div>
+      </section>
+
+      <!-- ============ Quote band ============ -->
+      <section class="panel cm-sec" data-sec="quote">
+        <div class="panel-head">
+          <h2>The quotation</h2>
+          <button class="mini" type="button" data-reset="quote">Put the original back</button>
+        </div>
+        <div class="f-row">
+          <label for="cQuoteText">Quotation</label>
+          <textarea id="cQuoteText" rows="3" maxlength="600"></textarea>
+        </div>
+        <div class="f-grid two" style="margin-top:15px">
+          <div class="f-row">
+            <label for="cQuoteAttrib">Who said it</label>
+            <input id="cQuoteAttrib" type="text" maxlength="120">
+          </div>
+          <div class="f-row">
+            <label>Background picture</label>
+            <div class="cm-pick" id="cQuoteImage" data-field="quote.image"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Healing paths ============ -->
+      <section class="panel cm-sec" data-sec="healing">
+        <div class="panel-head">
+          <h2>The four ways to heal</h2>
+          <button class="mini" type="button" data-reset="healing">Put the originals back</button>
+        </div>
+        <p class="panel-note">The four cards that stack as you scroll. There are always four.</p>
+        <div id="cHealing"></div>
+      </section>
+
+      <!-- ============ About ============ -->
+      <section class="panel cm-sec" data-sec="about">
+        <div class="panel-head">
+          <h2>About Manjula</h2>
+          <button class="mini" type="button" data-reset="about">Put the original back</button>
+        </div>
+        <div class="f-row">
+          <label for="cAboutCreds">Credentials line</label>
+          <input id="cAboutCreds" type="text" maxlength="400">
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="cAboutLead">Opening paragraph</label>
+          <textarea id="cAboutLead" rows="3" maxlength="800"></textarea>
+        </div>
+        <div class="f-row" style="margin-top:15px">
+          <label for="cAboutMuted">Second paragraph</label>
+          <textarea id="cAboutMuted" rows="3" maxlength="800"></textarea>
+        </div>
+      </section>
+
+      <!-- ============ Apothecary ============ -->
+      <section class="panel cm-sec" data-sec="apothecary">
+        <div class="panel-head">
+          <h2>The apothecary</h2>
+          <button class="mini" type="button" data-reset="apothecary">Put the originals back</button>
+        </div>
+
+        <p class="panel-note">How things are made — the three steps beside the pictures.</p>
+        <div id="cSteps"></div>
+
+        <div class="panel-head" style="margin-top:28px">
+          <h3 style="margin:0">The collection</h3>
+          <button class="btn btn-gold" type="button" id="cAddProduct"><span class="roll"><span>+ Add a product</span><span>+ Add a product</span></span></button>
+        </div>
+        <p class="panel-note">Candles, soaps and anything else you sell. Drag is not needed —
+        use the arrows to move one up or down. Hiding keeps it here but takes it off the website.</p>
+        <div id="cProducts"></div>
+      </section>
+
+      <!-- ============ Film ============ -->
+      <section class="panel cm-sec" data-sec="film">
+        <div class="panel-head">
+          <h2>The film</h2>
+          <button class="mini" type="button" data-reset="film">Put the original back</button>
+        </div>
+        <p class="panel-note">Paste a YouTube or Vimeo link and it plays on the front page.
+        Leave it empty to keep the video already on the site. Photos and videos cannot be
+        uploaded here — that needs a paid Firebase plan — so a link is the way.</p>
+
+        <div class="f-row">
+          <label for="cFilmUrl">Link to the film</label>
+          <input id="cFilmUrl" type="url" inputmode="url" maxlength="400" placeholder="https://www.youtube.com/watch?v=…">
+          <p class="f-err" data-err="film" hidden></p>
+          <p class="f-hint" id="cFilmWhat">—</p>
+        </div>
+
+        <div class="f-grid two" style="margin-top:15px">
+          <div class="f-row">
+            <label for="cFilmHeading">Heading above it</label>
+            <input id="cFilmHeading" type="text" maxlength="200">
+          </div>
+          <div class="f-row">
+            <label>Still picture before it plays</label>
+            <div class="cm-pick" id="cFilmPoster" data-field="film.poster"></div>
+          </div>
+        </div>
+
+        <label class="terms" style="margin-top:16px;background:#fff">
+          <input type="checkbox" id="cFilmPublished" checked>
+          <span class="terms-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+          <span class="terms-text">Show the film section on the website. Untick to hide it
+          until you have a video ready.</span>
+        </label>
+      </section>
+
+      <!-- ============ Contact (read only, deliberately) ============ -->
+      <section class="panel cm-sec">
+        <div class="panel-head"><h2>Contact details</h2></div>
+        <p class="panel-note">These are not editable here, and the reason is worth knowing.
+        Your number and email appear <strong>28 times</strong> across the site, and 20 of those
+        are on the terms, privacy and refund pages. This editor only reaches the front page,
+        so a box here would change the homepage and leave the policy pages quoting the old
+        number. A site that disagrees with itself about how to reach you is worse than one
+        that needs a developer for a change that happens once every few years.</p>
+        <div class="cm-readonly" id="cContactShow"></div>
+        <p class="f-hint">To change them, ask your developer. It is a two-minute job done properly,
+        in all 28 places at once.</p>
+      </section>
+
+      <div class="cm-bar">
+        <div class="cm-bar-in">
+          <span id="cStatus">No changes yet.</span>
+          <div class="cm-bar-acts">
+            <a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener">See the website</a>
+            <button class="btn btn-gold" type="button" id="cSave"><span class="roll"><span>Save changes</span><span>Save changes</span></span></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Picture chooser -->
+  <dialog class="dlg auth-dlg" id="pickDlg" aria-labelledby="pickTitle">
+    <div class="auth-form" style="max-width:none">
+      <button class="dlg-close" id="pickClose" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <p class="dlg-kicker">Choose a picture</p>
+      <h3 id="pickTitle">Pictures already on the site</h3>
+      <p class="auth-lead">New photographs have to be added to the site itself, which needs a
+      developer — uploading is not possible on the free plan.</p>
+      <div class="cm-grid" id="pickGrid"></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js?v=10"></script>
+  <script src="js/seed-content.js?v=6"></script>
+  <script src="js/store.js?v=15"></script>
+  <script src="js/auth-ui.js?v=7"></script>
+  <script src="js/content-admin.js?v=1"></script>
+</body>
+</html>

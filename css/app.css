@@ -419,3 +419,111 @@ table.adm .who span { color: var(--muted); font-size: 12.5px; }
 @media (max-width: 420px) {
   .f-phone { grid-template-columns: 92px 1fr; gap: 6px; }
 }
+
+/* =========================================================
+   Website content editor (content.html)
+   ========================================================= */
+.cm-help { background: rgba(75, 36, 89, .05); border-color: rgba(75, 36, 89, .14); }
+.cm-help p { margin: 0; line-height: 1.6; }
+
+.cm-sec { margin-top: 18px; }
+.cm-sec .panel-head { align-items: center; }
+
+/* The grey line under a field saying what the website currently reads. */
+.cm-origin {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.cm-origin span { text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px; }
+.cm-origin em { font-style: normal; }
+.cm-undo {
+  border: 0; background: none; padding: 0 0 0 4px;
+  font: inherit; color: var(--violet); text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer;
+}
+.cm-undo:hover { color: var(--plum); }
+
+/* Repeating blocks: healing cards, apothecary steps, products. */
+.cm-item {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-top: 12px;
+  background: #fff;
+}
+.cm-item.is-hidden { opacity: .55; }
+.cm-item-n {
+  margin: 0 0 10px;
+  font: 600 10.5px/1 var(--sans);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+.cm-prod { display: grid; grid-template-columns: 92px 1fr auto; gap: 14px; align-items: start; }
+.cm-prod-main { min-width: 0; }
+.cm-prod-acts { display: flex; flex-direction: column; gap: 6px; }
+
+/* Picture chooser: show the picture, not the file name. */
+.cm-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cm-pick-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff;
+  cursor: pointer; text-align: left;
+}
+.cm-pick-btn:hover { border-color: var(--violet); }
+.cm-pick-btn img { width: 56px; height: 42px; object-fit: cover; border-radius: 8px; display: block; }
+.cm-pick-none {
+  width: 56px; height: 42px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--paper); color: var(--muted); font-size: 10px; text-align: center;
+}
+.cm-pick-label { font-size: 13px; color: var(--ink-2); }
+
+.cm-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px; margin-top: 16px; max-height: 58vh; overflow: auto; padding: 2px;
+}
+.cm-tile {
+  border: 1px solid var(--line); border-radius: 12px; background: #fff;
+  padding: 0; overflow: hidden; cursor: pointer; display: block; text-align: left;
+}
+.cm-tile:hover { border-color: var(--violet); }
+.cm-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.cm-tile span { display: block; padding: 7px 9px; font-size: 11.5px; color: var(--muted); }
+
+.cm-readonly { display: grid; gap: 8px; margin-top: 4px; }
+.cm-readonly p {
+  margin: 0; display: flex; gap: 14px; align-items: baseline;
+  padding: 10px 12px; border-radius: 10px; background: var(--paper);
+}
+.cm-readonly strong {
+  font: 600 10.5px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); min-width: 120px;
+}
+
+/* The save bar stays in view: she should never have to hunt for Save. */
+.cm-bar {
+  position: sticky; bottom: 0; z-index: 20;
+  margin: 24px -4px 0; padding: 12px 4px;
+  background: linear-gradient(to top, var(--cream) 62%, rgba(250, 246, 240, 0));
+}
+.cm-bar-in {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px; border-radius: 16px;
+  background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 10px 40px -18px rgba(38, 26, 46, .4);
+}
+.cm-bar-acts { display: flex; gap: 10px; flex-wrap: wrap; }
+#cStatus { font-size: 14px; color: var(--muted); }
+#cStatus.is-dirty { color: #8A6417; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .cm-prod { grid-template-columns: 1fr; }
+  .cm-prod-acts { flex-direction: row; flex-wrap: wrap; }
+  .cm-bar-in { flex-direction: column; align-items: stretch; }
+  .cm-bar-acts .btn { flex: 1 1 auto; }
+}

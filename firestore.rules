@@ -141,6 +141,25 @@ service cloud.firestore {
         && d.keys().hasOnly(regFields());
     }
 
+    /* Bounds for the homepage content. Generous for real prose, useless for
+       filling a database. Lists are capped because they render as cards and a
+       hundred of them would be a broken page, not a feature. */
+    function contentIsSane(d) {
+      return (!('hero' in d) || (d.hero.keys().hasOnly(['sub']) && shortText(d.hero.sub, 400)))
+        && (!('quote' in d) || (d.quote.keys().hasOnly(['text', 'attrib', 'image'])
+              && shortText(d.quote.text, 600) && shortText(d.quote.attrib, 120) && shortText(d.quote.image, 200)))
+        && (!('about' in d) || (d.about.keys().hasOnly(['creds', 'lead', 'muted'])
+              && shortText(d.about.creds, 400) && shortText(d.about.lead, 800) && shortText(d.about.muted, 800)))
+        && (!('healing' in d) || (d.healing is list && d.healing.size() <= 8))
+        /* 12 products, because .col-grid is three columns: that is four tidy
+           rows, and these cards are enquiry categories rather than a catalogue. */
+        && (!('apothecary' in d) || (d.apothecary.keys().hasOnly(['steps', 'products', 'intro'])
+              && (!('steps' in d.apothecary) || d.apothecary.steps.size() <= 6)
+              && (!('products' in d.apothecary) || d.apothecary.products.size() <= 12)))
+        && (!('film' in d) || (d.film.keys().hasOnly(['url', 'poster', 'published', 'heading'])
+              && shortText(d.film.url, 400) && shortText(d.film.poster, 200) && shortText(d.film.heading, 200)));
+    }
+
     /* =====================================================
        activities — the workshops shown on the website
        Anyone may read (the public site lists them).
@@ -149,6 +168,23 @@ service cloud.firestore {
     match /activities/{activityId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    /* =====================================================
+       content — the words and pictures on the homepage
+       Anyone may read: the public site renders from it.
+       Only Manjula may write, and only within sane bounds. A content document
+       is a few kilobytes of prose; the caps exist so a mistake, or a stolen
+       session, cannot grow it towards Firestore's 1 MiB ceiling in a document
+       every single visitor downloads on every visit.
+       ===================================================== */
+    match /content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && docId == 'site'
+        && incoming().keys().hasOnly(['hero', 'quote', 'healing', 'about',
+                                      'apothecary', 'film', 'updatedAt'])
+        && contentIsSane(incoming());
     }
 
     /* =====================================================
