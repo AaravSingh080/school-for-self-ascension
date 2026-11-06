@@ -28,7 +28,8 @@
     activities: 'ssa.activities',
     registrations: 'ssa.registrations',
     seeded: 'ssa.seeded',
-    deleted: 'ssa.deleted'
+    deleted: 'ssa.deleted',
+    content: 'ssa.content'
   };
 
   const TERMS_VERSION = '2026-11-01';
@@ -237,6 +238,10 @@
         if (!gone.includes(id)) { gone.push(id); writeLS(LS.deleted, gone); }
       },
 
+      /* ---- site content ---- */
+      async getContent() { return readLS(LS.content, {}); },
+      async saveContent(obj) { writeLS(LS.content, obj); return obj; },
+
       /* ---- registrations ---- */
       async createRegistration(reg) {
         const all = readLS(LS.registrations, []);
@@ -415,6 +420,25 @@
       },
 
       /* ---- registrations ---- */
+      /* ---- site content ----
+         One document. The words on the homepage are a few kilobytes and are
+         always read and written together, so a single doc keeps the read cheap
+         and the write atomic - there is no half-saved homepage. */
+      async getContent() {
+        try {
+          const snap = await fb.fs.getDoc(fb.fs.doc(db, 'content', 'site'));
+          return snap.exists() ? snap.data() : {};
+        } catch (e) { throw friendly(e); }
+      },
+
+      async saveContent(obj) {
+        try {
+          await fb.fs.setDoc(fb.fs.doc(db, 'content', 'site'),
+            Object.assign({}, obj, { updatedAt: now() }), { merge: false });
+          return obj;
+        } catch (e) { throw friendly(e); }
+      },
+
       async createRegistration(reg) {
         try {
           const data = Object.assign({}, reg); delete data.id;
@@ -497,6 +521,11 @@
         driver.signIn = unavailable;
         driver.resetPassword = unavailable;
         driver.createRegistration = unavailable;
+        /* And saving website content. Without this line Manjula edits the
+           homepage, sees a green "Saved", and the words go into her own
+           browser's storage while the live site never changes. She would have
+           no way at all to work out why. Refusing is the only honest answer. */
+        driver.saveContent = unavailable;
       }
     } else {
       driver = demoDriver();
@@ -599,6 +628,16 @@
         for (const a of fresh) await driver.saveActivity(a);
         return fresh.length;
       }
+    },
+
+    /* The words and pictures on the homepage.
+       Every field is OPTIONAL by design: anything not set here falls through to
+       what is written in index.html. That is what makes this safe to hand to
+       someone non-technical - clearing a box cannot leave a blank space on the
+       site, it just puts the original wording back. */
+    content: {
+      get: () => driver.getContent(),
+      save: obj => driver.saveContent(obj)
     },
 
     registrations: {
